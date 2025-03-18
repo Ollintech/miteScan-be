@@ -1,14 +1,17 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from database import SessionLocal, User
+from app.db.database import SessionLocal, User
+import secrets
+from app.core.config import settings
 
-secret_key = ''
-algorithm = 'HS256'
-access_token_expire_minutes = 30
+strong_secret = settings.secret_key or secrets.token_urlsafe(64)
+secret_key = strong_secret
+algorithm = settings.algorithm
+access_token_expire_minutes = settings.access_token_expire_minutes
 
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = 'auto')
 

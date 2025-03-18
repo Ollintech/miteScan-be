@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Optional
 
 class RoleResponse(BaseModel):
     id: int

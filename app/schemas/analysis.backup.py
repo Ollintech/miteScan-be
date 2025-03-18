@@ -5,8 +5,9 @@ class AnalysisBackupCreate(BaseModel):
     analysis_id: int
     user_id: int
     file_path: str
+    created_at: datetime
 
-class AnalysisBackupCreate(BaseModel):
+class AnalysisBackupResponse(BaseModel):
     id: int
     analysis_id: int
     user_id: int

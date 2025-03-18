@@ -8,7 +8,7 @@ class HiveAnalysesCreate(BaseModel):
     varroa_detected: bool = False
     detection_confidence: float
 
-class HiveAnalysesCreate(BaseModel):
+class HiveAnalysesUpdate(BaseModel):
     id: int
     hive_id: int
     user_id: int

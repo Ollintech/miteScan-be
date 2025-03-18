@@ -8,9 +8,6 @@ class HiveAnalysesCreate(BaseModel):
     varroa_detected: bool = False
     detection_confidence: float
 
-    class Config:
-        orm_mode = True
-
 class HiveAnalysesCreate(BaseModel):
     id: int
     hive_id: int

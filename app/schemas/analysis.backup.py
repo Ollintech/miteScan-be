@@ -6,9 +6,6 @@ class AnalysisBackupCreate(BaseModel):
     user_id: int
     file_path: str
 
-    class Config:
-        orm_mode = True
-
 class AnalysisBackupCreate(BaseModel):
     id: int
     analysis_id: int

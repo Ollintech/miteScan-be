@@ -1,0 +1,37 @@
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from db.database import get_db
+from models.bee_type import BeeType
+from schemas.bee_type import BeeTypeCreate, BeeTypeResponse, BeeTypeUpdate
+
+router = APIRouter('/bee_types', tags = ['bee_types'])
+
+@router.post(response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)
+def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
+    if db.query(BeeType).filter(BeeType.name == bee_type.name).first():
+        raise HTTPException(status_code = 400, detail = 'Abelha já cadastrada.')
+    
+    new_bee_type = BeeType(
+        name = bee_type.name,
+        description = bee_type.description,
+        user_id = bee_type.user_id
+    )
+
+    db.add(new_bee_type)
+    db.commit()
+    db.refresh(new_bee_type)
+
+    return new_bee_type
+
+@router.get('/{bee_type_id}', response_model = BeeTypeResponse)
+def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
+    bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
+
+    if not bee_type:
+        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+    
+    return bee_type
+
+@router.put('/{bee_type_id}', response_model = BeeTypeResponse)
+def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Session = Depends(get_db)):
+    bee_type = db.query

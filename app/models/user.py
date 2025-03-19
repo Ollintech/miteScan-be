@@ -13,7 +13,7 @@ class User(Base):
     status = Column(Boolean, nullable = False, default = False)
     role_id = Column(Integer, ForeignKey('roles.id'))
 
-    role = relationship('Role', back_populates = 'users')
+    role = relationship('Role', back_populates = 'users')    
     hives = relationship('Hive', back_populates = 'owner')
     analyses = relationship('HiveAnalysis', back_populates = 'user')
     backups = relationship('AnalysisBackup', back_populates = 'user')

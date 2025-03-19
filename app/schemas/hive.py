@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Optional
+from sqlalchemy import UniqueConstraint
 
 class HiveCreate(BaseModel):
     user_id: int
@@ -8,6 +9,10 @@ class HiveCreate(BaseModel):
     size: int
     humidity: Optional[float] = None
     temperature: Optional[float] = None
+
+    __table_args__ = (
+        UniqueConstraint('location_lat', 'location_lng', name='unique_hive_location'),
+    )
 
 class HiveResponse(BaseModel):
     id: int

@@ -4,9 +4,9 @@ from db.database import get_db
 from models.bee_type import BeeType
 from schemas.bee_type import BeeTypeCreate, BeeTypeResponse, BeeTypeUpdate
 
-router = APIRouter('/bee_types', tags = ['bee_types'])
+router = APIRouter(prefix = '/bee_types', tags = ['bee_types'])
 
-@router.post(response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)
+@router.post('/', response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)
 def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
     if db.query(BeeType).filter(BeeType.name == bee_type.name).first():
         raise HTTPException(status_code = 400, detail = 'Abelha já cadastrada.')

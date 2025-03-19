@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 def get_password_hash(password: str):
     return pwd_context.hash(password)
 
-@router.post('/', response_model = UserResponse, status_code = status.HTTP_201_CREATED)
+@router.post('/create', response_model = UserResponse, status_code = status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code = 400, detail = "Email já cadastrado.")
@@ -22,9 +22,9 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         name = user.name,
         email = user.email,
         password_hash = get_password_hash(user.password),
-        status = True,
-        last_login = None,
-        role_id = user.role_id
+        status = True
+        # last_login = None,
+        # role_id = user.role_id
     )
 
     db.add(new_user)
@@ -65,7 +65,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     if user_update.status is not None:
         user.status = user_update.status
 
-    user.last_login = datetime.utcnow()
+    # user.last_login = datetime.utcnow()
 
     db.commit()
     db.refresh(user)

@@ -15,6 +15,6 @@ class User(Base):
 
     role = relationship('Role', back_populates = 'users')    
     hives = relationship('Hive', back_populates = 'owner')
-    analyses = relationship('HiveAnalysis', back_populates = 'user')
-    backups = relationship('AnalysisBackup', back_populates = 'user')
+    analysis = relationship('HiveAnalysis', back_populates = 'user')
+    backups = relationship('AnalysisBackup', back_populates='user')
     beetypes = relationship('BeeType', back_populates = 'user')

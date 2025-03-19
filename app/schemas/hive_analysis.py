@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class HiveAnalysesCreate(BaseModel):
+class HiveAnalysisCreate(BaseModel):
     hive_id: int
     user_id: int
     image_path: str
     varroa_detected: bool = False
     detection_confidence: float
 
-class HiveAnalysesUpdate(BaseModel):
+class HiveAnalysisResponse(BaseModel):
     id: int
     hive_id: int
     user_id: int

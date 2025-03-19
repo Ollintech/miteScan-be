@@ -12,3 +12,4 @@ class AnalysisBackup(Base):
 
     analysis = relationship('HiveAnalysis', back_populates = 'backup')
     user = relationship('User', back_populates='backups')
+

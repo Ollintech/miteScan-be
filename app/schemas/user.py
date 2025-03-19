@@ -1,10 +1,11 @@
-from pydantic import BaseModel, EmailStr, validator, Optional
+from pydantic import BaseModel, EmailStr, validator
+from typing import Optional
 
 class UserCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
-    role_id: int
+    # role_id: int
 
     @validator('password')
     def password_length(cls, v):
@@ -17,13 +18,13 @@ class UserResponse(BaseModel):
     name: str
     email: str
     status: bool
-    role_id: int
+    # role_id: int
 
     class Config:
         orm_mode = True
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     password: Optional[str] = None
     role_id: Optional[int] = None

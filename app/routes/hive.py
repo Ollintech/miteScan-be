@@ -39,6 +39,40 @@ def get_hive(hive_id: int, db: Session = Depends(get_db)):
 
     return hive
 
+@router.put('/{hive_id}', response_model = HiveResponse)
+def update_hive(hive_id: int, hive_update: HiveUpdate , db: Session = Depends(get_db)):
+    hive = db.query(Hive).filter(Hive.id == hive_id).first()
+
+    if not hive:
+        raise HTTPException(status_code = 404, detail = 'Colmeia não encontrada.')
+
+    if hive_update.user_id:
+        Hive.user_id == hive_update.user_id
+
+    if hive_update.bee_type_id:
+        Hive.bee_type_id == hive_update.bee_type_id
+
+    if hive_update.location_lat:
+        Hive.location_lat == hive_update.location_lat
+
+    if hive_update.location_lng:
+        Hive.location_lng == hive_update.location_lng
+
+    if hive_update.size:
+        Hive.size == hive_update.size
+
+    if hive_update.humidity:
+        Hive.humidity == hive_update.humidity
+
+    if hive_update.temperature:
+        Hive.temperature == hive_update.temperature
+
+    db.commit()
+
+    db.refresh(hive)
+    
+    return hive
+
 @router.delete('/{hive_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_hive(hive_id: int, db: Session = Depends(get_db)):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()

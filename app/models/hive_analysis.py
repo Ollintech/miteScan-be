@@ -14,6 +14,6 @@ class HiveAnalysis(Base):
     detection_confidence = Column(Float, nullable = False)
     created_at = Column(DateTime, default = datetime.utcnow)
 
-    hive = relationship('Hive', back_populates = 'analyses')
-    user = relationship('User', back_populates = 'analyses')
+    hive = relationship('Hive', back_populates = 'analysis')
+    user = relationship('User', back_populates = 'analysis')
     backup = relationship('AnalysisBackup', back_populates = 'analysis')

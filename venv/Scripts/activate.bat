@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\fatec-dsm3\Desktop\ana\MiteScan\venv
+set VIRTUAL_ENV=C:\Users\fatec-dsm3\Documents\GitHub\MiteScan\venv
 
 if not defined PROMPT set PROMPT=$P$G
 

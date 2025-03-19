@@ -34,4 +34,30 @@ def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
 
 @router.put('/{bee_type_id}', response_model = BeeTypeResponse)
 def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Session = Depends(get_db)):
-    bee_type = db.query
+    bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).fisrt()
+
+    if not bee_type:
+        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+
+    if bee_type_update.name:
+        bee_type.name = bee_type_update.name
+
+    if bee_type_update.description:
+        bee_type.description = bee_type_update.description
+
+    db.commit()
+    db.refresh(bee_type)
+
+    return bee_type
+
+@router.delete('/{bee_type_id}', status_code = status.HTTP_204_NO_CONTENT)
+def delete_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
+    bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
+
+    if not bee_type:
+        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+
+    db.delete(bee_type)
+    db.commit()
+
+    return {'message': 'Tipo de abelha deletado com sucesso!'}

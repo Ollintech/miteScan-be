@@ -7,3 +7,5 @@ try:
         print("✅ Conectado ao banco de dados com sucesso!")
 except Exception as e:
     print(f"❌ Erro ao conectar ao banco: {e}")
+
+# text

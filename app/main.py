@@ -1,7 +1,12 @@
-from fastapi import FastAPI
+# importando o framework para a criação da API em Python
+from fastapi import FastAPI 
+# importando o servidor web
 import uvicorn
+# importando as rotas 
 from routes import user, hive, role, bee_type, analysis_backup, hive_analysis
+# importando
 from db.database import Base, engine
+
 
 app = FastAPI()
 

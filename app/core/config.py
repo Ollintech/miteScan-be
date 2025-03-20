@@ -6,9 +6,8 @@ load_dotenv()
 
 class Settings(BaseSettings):
     database_url: str = f"postgresql://{os.getenv('postgres_user')}:{os.getenv('postgres_password')}@{os.getenv('postgres_host')}:{os.getenv('postgres_port')}/{os.getenv('postgres_db')}"
-    secret_key: str = os.getenv("secret_key")
-    algorithm: str = os.getenv("algorithm", "HS256")
-    access_token_expire_minutes: int = int(os.getenv("access_token_expire_minutes", 30))
-    google_maps_api_key: str = os.getenv("google_maps_api_key")
+    secret_key: str = "secret key"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
 
 settings = Settings()

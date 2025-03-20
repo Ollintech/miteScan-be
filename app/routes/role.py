@@ -1,14 +1,13 @@
 from fastapi import Depends, HTTPException, APIRouter, status
 from sqlalchemy.orm import Session
-from datetime import datetime
 from db.database import get_db
 from models.role import Role
-from schemas.role import RoleResponse, RoleUpdate
+from schemas.role import RoleResponse
 
 router = APIRouter(prefix = '/role', tags = ['roles'])
 
 
-@router.get('/{role_id}', response_model = RoleResponse)
+@router.get('/get:{role_id}', response_model = RoleResponse)
 def get_role(role_id: int, db: Session = Depends(get_db)):
     role = db.query(Role).filter(Role.id == role_id).first()
 

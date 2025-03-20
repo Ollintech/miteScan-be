@@ -6,7 +6,7 @@ from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 
 router = APIRouter(prefix = '/hives', tags = ['hives'])
 
-@router.post('/', response_model = HiveResponse, status_code = status.HTTP_201_CREATED)
+@router.post('/create', response_model = HiveResponse, status_code = status.HTTP_201_CREATED)
 def create_hive(hive: HiveCreate, db: Session = Depends(get_db)):
     if db.query(Hive).filter(
         Hive.location_lat == hive.location_lat,
@@ -30,7 +30,7 @@ def create_hive(hive: HiveCreate, db: Session = Depends(get_db)):
 
     return new_hive
 
-@router.get('/{hive_id}', response_model = HiveResponse)
+@router.get('/get:{hive_id}', response_model = HiveResponse)
 def get_hive(hive_id: int, db: Session = Depends(get_db)):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
@@ -39,7 +39,7 @@ def get_hive(hive_id: int, db: Session = Depends(get_db)):
 
     return hive
 
-@router.put('/{hive_id}', response_model = HiveResponse)
+@router.put('/put:{hive_id}', response_model = HiveResponse)
 def update_hive(hive_id: int, hive_update: HiveUpdate , db: Session = Depends(get_db)):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
@@ -73,7 +73,7 @@ def update_hive(hive_id: int, hive_update: HiveUpdate , db: Session = Depends(ge
     
     return hive
 
-@router.delete('/{hive_id}', status_code = status.HTTP_204_NO_CONTENT)
+@router.delete('/delete:{hive_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_hive(hive_id: int, db: Session = Depends(get_db)):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 

@@ -22,7 +22,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         name = user.name,
         email = user.email,
         password_hash = get_password_hash(user.password),
-        status = True,
+        status = False,
         last_login = None,
         role_id = user.role_id
     )
@@ -34,7 +34,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get('/{user_id}', response_model = UserResponse)
+@router.get('/get:{user_id}', response_model = UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -44,7 +44,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.put('/{user_id}', response_model = UserResponse)
+@router.put('/put:{user_id}', response_model = UserResponse)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -70,7 +70,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
 
     return user
 
-@router.delete('/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
+@router.delete('/delete:{user_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     

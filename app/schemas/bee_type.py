@@ -13,7 +13,7 @@ class BeeTypeResponse(BaseModel):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class BeeTypeUpdate(BaseModel):
     name: Optional[str] = None

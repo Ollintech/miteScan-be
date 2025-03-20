@@ -16,4 +16,4 @@ class Hive(Base):
 
     owner = relationship('User', back_populates = 'hives')
     bee_type = relationship('BeeType', back_populates = 'hives')
-    analyses = relationship('HiveAnalysis', back_populates = 'hive')
+    analyses = relationship("HiveAnalysis", back_populates = "hive", cascade = "all, delete-orphan")

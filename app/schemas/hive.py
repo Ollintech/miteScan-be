@@ -26,7 +26,7 @@ class HiveResponse(BaseModel):
     temperature: Optional[float] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class HiveUpdate(BaseModel):
     user_id: Optional[int] = None

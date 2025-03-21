@@ -6,6 +6,7 @@ from schemas.hive_analysis import HiveAnalysisCreate, HiveAnalysisResponse
 
 router = APIRouter(prefix = '/hive_analyses', tags = ['hive_analyses'])
 
+# Rota de criação de análise da colmeia
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db)):
 
@@ -23,6 +24,7 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
     return new_hive_analysis
 
+# Rota que mostra os dados da análise da colmeia
 @router.get('/get:{hive_analysis_id}', response_model = HiveAnalysisResponse)
 def get_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db)):
     hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.id == hive_analysis_id).first()
@@ -32,6 +34,7 @@ def get_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db)):
     
     return hive_analysis
 
+# Rota para deletar a análise da colmeia
 @router.delete('/delete:{hive_analysis_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db)):
     hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.id == hive_analysis_id).first()

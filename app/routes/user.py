@@ -13,6 +13,7 @@ pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 def get_password_hash(password: str):
     return pwd_context.hash(password)
 
+# Rota de criação do usuário
 @router.post('/create', response_model = UserResponse, status_code = status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
@@ -33,7 +34,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
-
+# Rota para obter os dados do usuário
 @router.get('/get:{user_id}', response_model = UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -43,7 +44,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return user
 
-
+# Rota para atualizar os dados do usuário
 @router.put('/put:{user_id}', response_model = UserResponse)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -70,6 +71,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
 
     return user
 
+# Rota para deletar um usuário
 @router.delete('/delete:{user_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()

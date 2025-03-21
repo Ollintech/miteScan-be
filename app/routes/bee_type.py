@@ -6,6 +6,7 @@ from schemas.bee_type import BeeTypeCreate, BeeTypeResponse, BeeTypeUpdate
 
 router = APIRouter(prefix = '/bee_types', tags = ['bee_types'])
 
+# Rota de criação de tipo de abelha
 @router.post('/create', response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)
 def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
     if db.query(BeeType).filter(BeeType.name == bee_type.name).first():
@@ -23,6 +24,7 @@ def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
 
     return new_bee_type
 
+# Rota que retorna os dados do tipo de abelha
 @router.get('/get:{bee_type_id}', response_model = BeeTypeResponse)
 def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
@@ -32,6 +34,7 @@ def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
     
     return bee_type
 
+# Rota para atualizar um tipo de abelha ja existente
 @router.put('/put:{bee_type_id}', response_model = BeeTypeResponse)
 def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).fisrt()
@@ -50,6 +53,7 @@ def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Sessio
 
     return bee_type
 
+# Rota para deletar um tipo de abelha
 @router.delete('/delete:{bee_type_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()

@@ -11,9 +11,9 @@ class User(Base):
     password_hash = Column(String(255), nullable = False)
     last_login = Column(DateTime, nullable = True)
     status = Column(Boolean, nullable = False, default = False)
-    role_id = Column(Integer, ForeignKey('roles.id'))
+    access_id = Column(Integer, ForeignKey('accesses.id'))
 
-    role = relationship('Role', back_populates = 'users')    
+    access = relationship('Access', back_populates = 'users')    
     hives = relationship('Hive', back_populates = 'owner')
     analysis = relationship('HiveAnalysis', back_populates = 'user')
     backups = relationship('AnalysisBackup', back_populates='user')

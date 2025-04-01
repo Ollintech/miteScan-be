@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, APIRouter, status
 from sqlalchemy.orm import Session
 from db.database import get_db
-from models.role import Role
+from app.models.access import Role
 from schemas.role import RoleResponse
 
 router = APIRouter(prefix = '/role', tags = ['roles'])

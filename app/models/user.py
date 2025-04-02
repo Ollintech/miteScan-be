@@ -12,9 +12,11 @@ class User(Base):
     last_login = Column(DateTime, nullable = True)
     status = Column(Boolean, nullable = False, default = False)
     access_id = Column(Integer, ForeignKey('accesses.id'))
+    company_id = Column(Integer, ForeignKey('companies.id'), nullable = False)
 
     access = relationship('Access', back_populates = 'users')    
     hives = relationship('Hive', back_populates = 'owner')
     analysis = relationship('HiveAnalysis', back_populates = 'user')
     backups = relationship('AnalysisBackup', back_populates='user')
     bee_types = relationship("BeeType", back_populates = "user", cascade = "all, delete-orphan")
+    company = relationship('Company', back_populates = 'user')

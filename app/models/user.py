@@ -19,4 +19,4 @@ class User(Base):
     analysis = relationship('HiveAnalysis', back_populates = 'user')
     backups = relationship('AnalysisBackup', back_populates='user')
     bee_types = relationship("BeeType", back_populates = "user", cascade = "all, delete-orphan")
-    company = relationship('Company', back_populates = 'user')
+    company = relationship('Company', back_populates = 'user') 

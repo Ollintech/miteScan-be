@@ -11,7 +11,7 @@ class User(Base):
     password_hash = Column(String(255), nullable = False)
     last_login = Column(DateTime, nullable = True)
     status = Column(Boolean, nullable = False, default = False)
-    access_id = Column(Integer, ForeignKey('accesses.id'))
+    access_id = Column(Integer, ForeignKey('accesses.id'), nullable = False)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable = False)
 
     access = relationship('Access', back_populates = 'users')    

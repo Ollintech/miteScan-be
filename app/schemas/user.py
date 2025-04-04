@@ -5,7 +5,8 @@ class UserCreate(BaseModel):
     name: str
     email: str
     password: str
-    role_id: int
+    access_id: int
+    company_id: int
 
     @validator('password')
     def password_length(cls, v):
@@ -18,7 +19,8 @@ class UserResponse(BaseModel):
     name: str
     email: str
     status: bool
-    role_id: int
+    access_id: int
+    company_id: int
 
     class Config:
         from_attributes = True
@@ -28,4 +30,5 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
     status: Optional[bool] = False
-    role_id: Optional[int] = None
+    access_id: Optional[int] = None
+    company_id: Optional[int] = None

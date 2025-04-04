@@ -25,7 +25,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         password_hash = get_password_hash(user.password),
         status = False,
         last_login = None,
-        role_id = user.role_id
+        access_id = user.access_id,
+        company_id = user.company_id,
     )
 
     db.add(new_user)
@@ -65,6 +66,12 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
 
     if user_update.status is not None:
         user.status = user_update.status
+
+    if user_update.access_id:
+        user.access_id = user_update.access_id
+
+    if user_update.company_id:
+        user.company_id = user_update.company_id
 
     db.commit()
     db.refresh(user)

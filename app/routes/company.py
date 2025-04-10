@@ -5,7 +5,7 @@ from db.database import get_db
 from models.company import Company
 from schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
-router = APIRouter(prefix = '/companies', tags = ['companies'])
+router = APIRouter(prefix = '/companies', tags = ['Companies'])
 
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 

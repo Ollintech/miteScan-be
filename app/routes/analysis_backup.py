@@ -5,7 +5,7 @@ from models.analysis_backup import AnalysisBackup
 from schemas.analysis_backup import AnalysisBackupCreate, AnalysisBackupResponse
 from datetime import datetime
 
-router = APIRouter(prefix = '/analysis_backup', tags = ['analysis_backup'])
+router = APIRouter(prefix = '/analysis_backup', tags = ['Analysis Backup'])
 
 # Rota de criação de backup de análise
 @router.post('/create', response_model = AnalysisBackupResponse, status_code = status.HTTP_201_CREATED)

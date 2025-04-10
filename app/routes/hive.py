@@ -4,7 +4,7 @@ from db.database import get_db
 from models.hive import Hive
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 
-router = APIRouter(prefix = '/hives', tags = ['hives'])
+router = APIRouter(prefix = '/hives', tags = ['Hives'])
 
 # Rota para a criação de colmeias
 @router.post('/create', response_model = HiveResponse, status_code = status.HTTP_201_CREATED)

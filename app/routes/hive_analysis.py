@@ -4,7 +4,7 @@ from db.database import get_db
 from models.hive_analysis import HiveAnalysis
 from schemas.hive_analysis import HiveAnalysisCreate, HiveAnalysisResponse
 
-router = APIRouter(prefix = '/hive_analyses', tags = ['hive_analyses'])
+router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
 
 # Rota de criação de análise da colmeia
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)

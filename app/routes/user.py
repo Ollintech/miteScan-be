@@ -6,7 +6,7 @@ from db.database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
 
-router = APIRouter(prefix = '/users', tags = ['users'])
+router = APIRouter(prefix = '/users', tags = ['Users'])
 
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 

@@ -4,7 +4,7 @@ from db.database import get_db
 from models.bee_type import BeeType
 from schemas.bee_type import BeeTypeCreate, BeeTypeResponse, BeeTypeUpdate
 
-router = APIRouter(prefix = '/bee_types', tags = ['bee_types'])
+router = APIRouter(prefix = '/bee_types', tags = ['Bee Types'])
 
 # Rota de criação de tipo de abelha
 @router.post('/create', response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)

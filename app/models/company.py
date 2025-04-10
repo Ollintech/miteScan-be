@@ -5,9 +5,6 @@ from db.database import Base
 class Company(Base):
     __tablename__ = 'companies'
 
-    id = Column(Integer, primary_key = True, auto_increment = True)
+    id = Column(Integer, primary_key = True)
     name = Column(String(200), nullable = False)
     cnpj = Column(Integer, nullable = False)
-
-    user = relationship('User', back_populates = 'company')
-    

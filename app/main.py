@@ -4,7 +4,7 @@ from fastapi import FastAPI
 import uvicorn
 # importando as rotas 
 from routes import access
-from routes import user, hive, bee_type, analysis_backup, hive_analysis
+from routes import user, hive, bee_type, analysis_backup, hive_analysis, access, company
 # importando
 from db.database import Base, engine
 
@@ -13,6 +13,7 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
+app.include_router(company.router)
 app.include_router(user.router)
 app.include_router(hive.router)
 app.include_router(access.router)

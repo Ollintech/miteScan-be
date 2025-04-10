@@ -4,7 +4,7 @@ from db.database import get_db
 from models.access import Access
 from schemas.access import AccessResponse
 
-router = APIRouter(prefix = '/access', tags = ['accesss'])
+router = APIRouter(prefix = '/access', tags = ['Accesss'])
 
 # Rota para obter os dados de acesso
 @router.get('/get:{access_id}', response_model = AccessResponse)

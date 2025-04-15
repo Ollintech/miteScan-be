@@ -36,7 +36,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 # Rota para obter os dados do usuário
-@router.get('/get:{user_id}', response_model = UserResponse)
+@router.get('/{user_id}', response_model = UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -46,7 +46,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 # Rota para atualizar os dados do usuário
-@router.put('/put:{user_id}', response_model = UserResponse)
+@router.put('/{user_id}', response_model = UserResponse)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -56,10 +56,12 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     if user_update.name:
         user.name = user_update.name
 
-    if user_update.email:
-        if db.query(User).filter(User.email == user_update.email).first():
-            raise HTTPException(status_code = 400, detail = 'Email já cadastrado.')
+    if user_update.email and user_update.email != user.email:
+        email_exists = db.query(User).filter(User.email == user_update.email).first()
+        if email_exists:
+            raise HTTPException(status_code=400, detail='Email já cadastrado.')
         user.email = user_update.email
+
 
     if user_update.password:
         user.password_hash = get_password_hash(user_update.password)
@@ -79,7 +81,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     return user
 
 # Rota para deletar um usuário
-@router.delete('/delete:{user_id}', status_code = status.HTTP_204_NO_CONTENT)
+@router.delete('/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     

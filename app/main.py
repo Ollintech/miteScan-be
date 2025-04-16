@@ -1,11 +1,14 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI, Depends
 import uvicorn
 from routes import user, hive, bee_type, analysis_backup, hive_analysis, access, company, sensor, auth
-from db.database import Base, engine
+from db.database import Base, engine, get_db
 from core.middleware import ActiveUserMiddleware
 from seed import seed_data
 import asyncio
 from mqtt_handler import run_mqtt_in_background
+from routes.sensor import receber_dados
+from sqlalchemy.orm import Session
+from schemas.sensor import SensorRead
 
 app = FastAPI()
 
@@ -24,14 +27,22 @@ app.include_router(sensor.router)
 app.include_router(auth.router)
 
 @app.post("/sensor")
-async def receive_sensor_data(data: dict):
-    print("Dados recebidos pela API:", data)
+async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
+    print("Sensor:", data)
+
+    try:
+        sensor_data = SensorRead(**data)
+        receber_dados(sensor_data, db)
+        print(f"Dados recebidos e processados.")
+    except Exception as e:
+        print(f"Erro ao processar os dados: {e}")
+    
     return {"status": "ok"}
 
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     seed_data()
-    asyncio.create_task(run_mqtt_in_background())
+    await run_mqtt_in_background()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

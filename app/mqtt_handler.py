@@ -17,7 +17,6 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
 
 def on_message(client, userdata, msg):
-    print(f"[MQTT] Mensagem recebida: {msg.payload.decode()}")
     try:
         data = json.loads(msg.payload.decode())
         response = requests.post(API_URL, json=data)
@@ -30,8 +29,9 @@ def start_mqtt():
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    client.loop_forever()
+    client.loop_start()
 
 async def run_mqtt_in_background():
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, start_mqtt)
+    start_mqtt()
+    await asyncio.sleep(0) 
+

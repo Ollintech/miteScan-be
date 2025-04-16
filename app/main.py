@@ -4,6 +4,8 @@ from routes import user, hive, bee_type, analysis_backup, hive_analysis, access,
 from db.database import Base, engine
 from core.middleware import ActiveUserMiddleware
 from seed import seed_data
+import asyncio
+from mqtt_handler import run_mqtt_in_background
 
 app = FastAPI()
 
@@ -21,9 +23,15 @@ app.include_router(hive_analysis.router)
 app.include_router(sensor.router)
 app.include_router(auth.router)
 
+@app.post("/sensor")
+async def receive_sensor_data(data: dict):
+    print("Dados recebidos pela API:", data)
+    return {"status": "ok"}
+
 @app.on_event("startup")
 def startup_event():
     seed_data()
+    asyncio.create_task(run_mqtt_in_background())
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

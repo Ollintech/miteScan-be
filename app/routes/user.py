@@ -1,17 +1,12 @@
 from fastapi import Depends, HTTPException, APIRouter, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime
 from db.database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
+from core.auth import get_password_hash
 
 router = APIRouter(prefix = '/users', tags = ['Users'])
-
-pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
-
-def get_password_hash(password: str):
-    return pwd_context.hash(password)
 
 # Rota de criação do usuário
 @router.post('/create', response_model = UserResponse, status_code = status.HTTP_201_CREATED)

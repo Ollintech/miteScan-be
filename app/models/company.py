@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 from db.database import Base
 
 class Company(Base):
@@ -7,4 +6,4 @@ class Company(Base):
 
     id = Column(Integer, primary_key = True)
     name = Column(String(200), nullable = False)
-    cnpj = Column(Integer, nullable = False)
+    cnpj = Column(String(14), nullable = False)

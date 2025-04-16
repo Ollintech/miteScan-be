@@ -27,7 +27,7 @@ def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     return new_company
 
 # Rota para obter os dados da empresa
-@router.get('/get:{company_id}', response_model = CompanyResponse)
+@router.get('/{company_id}', response_model = CompanyResponse)
 def get_user(company_id: int, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()
 
@@ -37,8 +37,8 @@ def get_user(company_id: int, db: Session = Depends(get_db)):
     return company
 
 # Rota para atualizar os dados da empresa
-@router.put('/put:{company_id}', response_model = CompanyResponse)
-def update_company(company_id: int, company_update: CompanyResponse, db: Session = Depends(get_db)):
+@router.put('/{company_id}', response_model = CompanyResponse)
+def update_company(company_id: int, company_update: CompanyUpdate, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()
 
     if not company:
@@ -58,7 +58,7 @@ def update_company(company_id: int, company_update: CompanyResponse, db: Session
     return company
 
 # Rota para deletar uma empresa
-@router.delete('/delete:{company_id}', status_code = status.HTTP_204_NO_CONTENT)
+@router.delete('/{company_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(company_id: int, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()
     

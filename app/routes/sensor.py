@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.models.hive import Hive
-from app.schemas.sensor import SensorRead
+from db.database import get_db
+from models.hive import Hive
+from schemas.sensor import SensorRead
 
-router = APIRouter()
+router = APIRouter(prefix='/sensor', tags=['Sensor'])
 
-@router.post("/sensor")
+#Essa rota atualiza os dados de temperatura e umidade da colmeia
+@router.post("/")
 def receber_dados(sensor: SensorRead, db: Session = Depends(get_db)):
+    print(sensor)
     colmeia = db.query(Hive).filter(Hive.id == sensor.colmeia_id).first()
 
     if not colmeia: 

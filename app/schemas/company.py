@@ -3,16 +3,16 @@ from typing import Optional
 
 class CompanyCreate(BaseModel):
     name: str
-    cnpj: int
+    cnpj: str
 
 class CompanyResponse(BaseModel):
     id: int
     name: str
-    cnpj: int
+    cnpj: str
 
     class Config:
         from_attributes = True
 
 class CompanyUpdate(BaseModel):
     name: Optional[str] = None
-    cnpj: Optional[int] = None
+    cnpj: Optional[str] = None

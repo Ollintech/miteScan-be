@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, Float, ForeignKey
-from sqlalchemy.orm import relationship
 from db.database import Base
 
 class Hive(Base):

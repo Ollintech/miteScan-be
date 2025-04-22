@@ -34,7 +34,7 @@ def create_hive(hive: HiveCreate, db: Session = Depends(get_db), user=Depends(re
 
 
 # Rota para obter os dados da colmeia
-@router.get('/get:{hive_id}', response_model=HiveResponse)
+@router.get('/{hive_id}', response_model=HiveResponse)
 def get_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager", "employee"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
@@ -45,7 +45,7 @@ def get_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_a
 
 
 # Rota para atualizar os dados da colmeia
-@router.put('/put:{hive_id}', response_model=HiveResponse)
+@router.put('/{hive_id}', response_model=HiveResponse)
 def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
@@ -80,7 +80,7 @@ def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get
 
 
 # Rota para deletar uma colmeia
-@router.delete('/delete:{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 

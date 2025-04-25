@@ -37,7 +37,7 @@ def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
 # Rota para atualizar um tipo de abelha ja existente
 @router.put('/{bee_type_id}', response_model = BeeTypeResponse)
 def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Session = Depends(get_db)):
-    bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).fisrt()
+    bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
 
     if not bee_type:
         raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')

@@ -10,7 +10,7 @@ from core.config import settings
 from sqlalchemy.orm import joinedload
 from models.user import User
 
-strong_secret = settings.secret_key or secrets.token_urlsafe(64)
+strong_secret = secrets.token_urlsafe(64)
 secret_key = strong_secret
 algorithm = settings.algorithm
 access_token_expire_minutes = settings.access_token_expire_minutes

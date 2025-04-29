@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 import uvicorn
-from routes import user, hive, bee_type, analysis_backup, hive_analysis, access, company, sensor, auth
+from routes import user, hive, bee_type, analysis_backup, hive_analysis, access, company, sensor
 from db.database import Base, engine, get_db
 from core.middleware import ActiveUserMiddleware
 from seed import seed_data
@@ -15,7 +15,6 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # seed_data()
-    import os
     if not os.getenv("TESTING"): 
         await run_mqtt_in_background()
     yield
@@ -35,7 +34,6 @@ app.include_router(bee_type.router)
 app.include_router(analysis_backup.router)
 app.include_router(hive_analysis.router)
 app.include_router(sensor.router)
-app.include_router(auth.router)
 
 @app.post("/sensor")
 async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):

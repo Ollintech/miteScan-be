@@ -3,33 +3,32 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from db.database import SessionLocal
-import secrets
 from core.config import settings
-from sqlalchemy.orm import joinedload
 from models.user import User
 
-strong_secret = secrets.token_urlsafe(64)
-secret_key = strong_secret
+# Configurações
+secret_key = settings.secret_key
 algorithm = settings.algorithm
 access_token_expire_minutes = settings.access_token_expire_minutes
 
-pwd_context = CryptContext(schemes = ['pbkdf2_sha256'], deprecated = 'auto')
+# Criptografia
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
-
-def create_access_token(data: dict, expires_delta: int = access_token_expire_minutes):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes = expires_delta)
-    to_encode.update({'exp': expire})
-    return jwt.encode(to_encode, secret_key, algorithm = algorithm)
-
+# Funções de autenticação
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: int = access_token_expire_minutes):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=expires_delta)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, secret_key, algorithm=algorithm)
 
 def get_db():
     db = SessionLocal()
@@ -48,9 +47,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
 
         user = db.query(User).options(joinedload(User.access)).filter(User.email == email).first()
-
         if not user:
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
         return user
@@ -61,7 +61,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=401, detail="Token inválido")
 
 def require_access(*allowed_access):
-    def access_checker(user = Depends(get_current_user)):
+    def access_checker(user=Depends(get_current_user)):
         if user.access.name not in allowed_access:
             raise HTTPException(status_code=403, detail="Acesso negado")
         return user

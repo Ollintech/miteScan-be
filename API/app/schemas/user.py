@@ -3,7 +3,7 @@ from typing import Optional
 
 class UserCreate(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: str
     access_id: int
     company_id: int
@@ -18,7 +18,7 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     name: str
-    email: str
+    email: EmailStr
     status: bool
     access_id: int
     company_id: int
@@ -28,7 +28,7 @@ class UserResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
     status: Optional[bool] = False
     access_id: Optional[int] = None

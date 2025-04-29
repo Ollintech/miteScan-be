@@ -5,13 +5,18 @@ from datetime import datetime
 from db.database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
-from core.auth import get_password_hash, verify_password, create_access_token
+from core.auth import (
+    get_password_hash,
+    create_access_token,
+    authenticate_user,
+    verify_password
+)
 
-router = APIRouter(prefix='/users', tags=['Users'])
+router = APIRouter(prefix="/users", tags=["Users"])
 
-# ========== Autenticação ==========
+# ========== Registro ==========
 
-@router.post('/register', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
@@ -26,19 +31,23 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         status=False,
         last_login=None
     )
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
     return new_user
 
+# ========== Login ==========
 
-@router.post('/login')
+@router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
-
-    if not user or not verify_password(form_data.password, user.password_hash):
+    user = authenticate_user(email=form_data.username, password=form_data.password, db=db)
+    if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
+
+    if not user.status:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo")
 
     user.last_login = datetime.utcnow()
     db.commit()
@@ -62,13 +71,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         }
     }
 
-# ========== CRUD de Usuário ==========
+# ========== CRUD ==========
 
-@router.post('/create', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Verificar se o email já está cadastrado
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email já cadastrado.")
-
+    
+    # Criar um novo usuário
     new_user = User(
         name=user.name,
         email=user.email,
@@ -76,9 +87,9 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         status=False,
         last_login=None,
         access_id=user.access_id,
-        company_id=user.company_id,
+        company_id=user.company_id
     )
-
+    
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -86,30 +97,25 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get('/{user_id}', response_model=UserResponse)
+@router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
-
     if not user:
-        raise HTTPException(status_code=404, detail='Usuário não encontrado.')
-
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
     return user
 
-
-@router.put('/{user_id}', response_model=UserResponse)
+@router.put("/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
-
     if not user:
-        raise HTTPException(status_code=404, detail='Usuário não encontrado.')
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
 
     if user_update.name:
         user.name = user_update.name
 
     if user_update.email and user_update.email != user.email:
-        email_exists = db.query(User).filter(User.email == user_update.email).first()
-        if email_exists:
-            raise HTTPException(status_code=400, detail='Email já cadastrado.')
+        if db.query(User).filter(User.email == user_update.email).first():
+            raise HTTPException(status_code=400, detail="Email já cadastrado.")
         user.email = user_update.email
 
     if user_update.password:
@@ -129,15 +135,13 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
 
     return user
 
-
-@router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
-
     if not user:
-        raise HTTPException(status_code=404, detail='Usuário não encontrado.')
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
 
     db.delete(user)
     db.commit()
 
-    return {'message': 'Usuário deletado com sucesso!'}
+    return {"message": "Usuário deletado com sucesso!"}

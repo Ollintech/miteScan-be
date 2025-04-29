@@ -23,7 +23,7 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
     db.commit()
     db.refresh(new_hive_analysis)
 
-    return {"message": "Análise da colmeia realizada com sucesso pelo usuário {user.name}"}
+    return new_hive_analysis
 
 # Rota que mostra os dados da análise da colmeia
 @router.get('/{hive_analysis_id}', response_model = HiveAnalysisResponse)

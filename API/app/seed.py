@@ -36,7 +36,7 @@ def seed_data():
             user = UserModel.User(
                 name="Ana",
                 email="ana@example.com",
-                password_hash=get_password_hash("12345678"),
+                password_hash=get_password_hash("senha123"),
                 access_id=access.id,
                 company_id=company.id,
                 status=True

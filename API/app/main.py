@@ -9,8 +9,19 @@ from mqtt_handler import run_mqtt_in_background
 from routes.sensor import receber_dados
 from sqlalchemy.orm import Session
 from schemas.sensor import SensorRead
+import os
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # seed_data()
+    import os
+    if not os.getenv("TESTING"): 
+        await run_mqtt_in_background()
+    yield
+    print("Aplicação desligando...")
+    
+app = FastAPI(lifespan=lifespan)
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,11 +49,6 @@ async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
         print(f"Erro ao processar os dados: {e}")
     
     return {"status": "ok"}
-
-@app.on_event("startup")
-async def startup_event():
-    seed_data()
-    await run_mqtt_in_background()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

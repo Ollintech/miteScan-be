@@ -17,7 +17,7 @@ access_token_expire_minutes = settings.access_token_expire_minutes
 
 pwd_context = CryptContext(schemes = ['pbkdf2_sha256'], deprecated = 'auto')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl = 'token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
 
 def create_access_token(data: dict, expires_delta: int = access_token_expire_minutes):
     to_encode = data.copy()

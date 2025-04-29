@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # seed_data()
+    seed_data()
     if not os.getenv("TESTING"): 
         await run_mqtt_in_background()
     yield

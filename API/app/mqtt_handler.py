@@ -28,8 +28,14 @@ def start_mqtt():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    client.loop_start()
+
+    try:
+        print(f"🔌 Conectando ao broker {MQTT_BROKER}:{MQTT_PORT}...")
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.loop_start()
+    except Exception as e:
+        print(f"❌ Falha ao conectar ao broker MQTT: {e}")
+
 
 async def run_mqtt_in_background():
     start_mqtt()

@@ -15,6 +15,8 @@ Esse repositório contém o back-end do projeto MiteScan, que está sendo desenv
 
 `docker run --name meu-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -e POSTGRES_DB=mitescan -p 5440:5432 -d postgres`
 
+- Crie uma cópia do arquivo ".env.example", com o nome ".env" e atualize os dados de acordo com os de criação do Docker.
+
 
 <h4> Para inicializar a API:  </h4>
 

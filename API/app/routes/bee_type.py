@@ -24,7 +24,7 @@ def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
 
     return new_bee_type
 
-@router.get('/all', response_model = BeeTypeResponse)
+@router.get('/all', response_model = list[BeeTypeResponse])
 def get_bee_type(db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).all()
 

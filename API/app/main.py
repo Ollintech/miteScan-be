@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from schemas.sensor import SensorRead
 import os
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,14 @@ async def lifespan(app: FastAPI):
     print("Aplicação desligando...")
     
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 Base.metadata.create_all(bind=engine)
 

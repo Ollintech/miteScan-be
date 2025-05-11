@@ -6,7 +6,15 @@ from schemas.access import AccessResponse
 
 router = APIRouter(prefix = '/access', tags = ['Accesss'])
 
-# Rota para obter os dados de acesso
+@router.get('/all', response_model = list[AccessResponse])
+def get_all_accesses(db: Session = Depends(get_db)):
+    accesses = db.query(Access).all()
+
+    if not accesses:
+        raise HTTPException(status_code = 404, detail = 'Acessos não cadastrados.')
+
+    return accesses
+
 @router.get('/{access_id}', response_model = AccessResponse)
 def get_access(access_id: int, db: Session = Depends(get_db)):
     access = db.query(Access).filter(Access.id == access_id).first()

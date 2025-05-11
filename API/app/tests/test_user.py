@@ -3,22 +3,13 @@ from models.user import User
 from models.access import Access
 from models.company import Company
 from core.auth import get_password_hash
-from tests.mock_data import mock_user, mock_user_response, mock_user_with_hash
-
-
-def create_dependencies(db):
-    access = Access(name="Padrão", description="Acesso comum")
-    company = Company(name="Empresa X", cnpj="11223344556677")
-    db.add_all([access, company])
-    db.commit()
-    db.refresh(access)
-    db.refresh(company)
-    return access.id, company.id
+from tests.mock_data import mock_user, mock_user_response, mock_user_with_hash, mock_access_response, mock_company_response
 
 
 def test_register_user_success(client, db):
-    access_id, company_id = create_dependencies(db)
-    user_data = mock_user_with_hash()  # O mock já vai gerar o password_hash
+    access_id = mock_access_response
+    company_id = mock_company_response
+    user_data = mock_user_with_hash()
 
     response = client.post("/users/register", json={**user_data, "access_id": access_id, "company_id": company_id})
 
@@ -30,15 +21,16 @@ def test_register_user_success(client, db):
 
 
 def test_register_user_email_duplicado(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"
+    user_data["password_hash"] = get_password_hash(password)
 
     user = User(
         name=user_data["name"],
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],
         access_id=access_id,
         company_id=company_id,
         status=False
@@ -53,15 +45,16 @@ def test_register_user_email_duplicado(client, db):
 
 
 def test_login_success(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     user = User(
         name=user_data["name"],
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],  
         access_id=access_id,
         company_id=company_id,
         status=True
@@ -71,7 +64,7 @@ def test_login_success(client, db):
 
     response = client.post("/users/login", data={
         "username": user_data["email"],
-        "password": password  # Passando a senha original aqui
+        "password": password  
     })
 
     assert response.status_code == 200
@@ -90,10 +83,11 @@ def test_login_invalid_credentials(client, db):
 
 
 def test_create_user_success(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user_response()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     response = client.post("/users/create", json={**user_data, "access_id": access_id, "company_id": company_id})
 
@@ -106,15 +100,16 @@ def test_create_user_success(client, db):
 
 
 def test_create_user_email_duplicado(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user_response()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     user = User(
         name="Usuário Existente",
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],  
         status=False,
         access_id=access_id,
         company_id=company_id
@@ -129,15 +124,16 @@ def test_create_user_email_duplicado(client, db):
 
 
 def test_get_user_success(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user_response()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     user = User(
         name=user_data["name"],
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],  
         status=True,
         access_id=access_id,
         company_id=company_id
@@ -159,15 +155,16 @@ def test_get_user_not_found(client):
 
 
 def test_update_user_success(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user_response()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     user = User(
         name=user_data["name"],
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],  
         status=False,
         access_id=access_id,
         company_id=company_id
@@ -187,7 +184,8 @@ def test_update_user_success(client, db):
 
 
 def test_update_user_email_duplicado(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user1 = User(
         name="User1", email="email1@test.com",
         password_hash=get_password_hash("senha1"),
@@ -205,15 +203,16 @@ def test_update_user_email_duplicado(client, db):
 
 
 def test_delete_user_success(client, db):
-    access_id, company_id = create_dependencies(db)
+    access_id = mock_access_response
+    company_id = mock_company_response
     user_data = mock_user_response()
-    password = "securePass123"  # Senha original
-    user_data["password_hash"] = get_password_hash(password)  # Gerando o hash da senha
+    password = "securePass123"  
+    user_data["password_hash"] = get_password_hash(password) 
 
     user = User(
         name=user_data["name"],
         email=user_data["email"],
-        password_hash=user_data["password_hash"],  # Ajustado para password_hash
+        password_hash=user_data["password_hash"],  
         status=False,
         access_id=access_id,
         company_id=company_id

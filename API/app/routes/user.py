@@ -14,8 +14,6 @@ from core.auth import (
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-# ========== Registro ==========
-
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -38,10 +36,8 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
-# ========== Login ==========
-
 @router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(email=form_data.username, password=form_data.password, db=db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
@@ -70,32 +66,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             "status": user.status
         }
     }
-
-# ========== CRUD ==========
-
-@router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    # Verificar se o email já está cadastrado
-    if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(status_code=400, detail="Email já cadastrado.")
-    
-    # Criar um novo usuário
-    new_user = User(
-        name=user.name,
-        email=user.email,
-        password_hash=get_password_hash(user.password),
-        status=False,
-        last_login=None,
-        access_id=user.access_id,
-        company_id=user.company_id
-    )
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
 
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):

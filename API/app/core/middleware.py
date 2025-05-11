@@ -21,6 +21,11 @@ class ActiveUserMiddleware(BaseHTTPMiddleware):
                     if user and user.status is False:
                         return JSONResponse(status_code=403, content={"message": "Usuário inativo"})
             response = await call_next(request)
+
+            response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+ 
             return response
         except Exception as e:
             return JSONResponse(status_code=401, content={"message": "Erro de autenticação"})

@@ -32,6 +32,14 @@ def create_hive(hive: HiveCreate, db: Session = Depends(get_db), user=Depends(re
 
     return {"message": f"Colmeia criada com sucesso pelo usuário {user.name} com o acesso {user.access.name}"}
 
+@router.get('/all', response_model=HiveResponse)
+def get_hive(db: Session = Depends(get_db), user=Depends(require_access("owner", "manager", "employee"))):
+    hive = db.query(Hive).all()
+
+    if not hive:
+        raise HTTPException(status_code=404, detail='Não existem colmeias cadastradas.')
+
+    return hive
 
 # Rota para obter os dados da colmeia
 @router.get('/{hive_id}', response_model=HiveResponse)

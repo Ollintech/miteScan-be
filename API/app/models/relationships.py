@@ -10,6 +10,9 @@ from .analysis_backup import AnalysisBackup
 def configure_relationships():
     Access.users = relationship('User', back_populates = 'access', cascade = "all, delete")
     User.access = relationship('Access', back_populates = 'users')
+    
+    Access.companies = relationship('Company', back_populates = 'access', cascade = "all, delete")
+    Company.access = relationship('Access', back_populates = 'companies')
 
     Company.users = relationship('User', back_populates = 'company', cascade = "all, delete")
     User.company = relationship('Company', back_populates = 'users')

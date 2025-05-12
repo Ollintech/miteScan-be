@@ -7,7 +7,6 @@ from datetime import datetime
 
 router = APIRouter(prefix = '/analysis_backup', tags = ['Analysis Backup'])
 
-# Rota de criação de backup de análise
 @router.post('/create', response_model = AnalysisBackupResponse, status_code = status.HTTP_201_CREATED)
 def create_analysis_backup(analysis_backup: AnalysisBackupCreate, db: Session = Depends(get_db)):
     
@@ -24,7 +23,6 @@ def create_analysis_backup(analysis_backup: AnalysisBackupCreate, db: Session = 
 
     return new_analysis_backup
 
-# Rota para mostrar o backup da análise
 @router.get('/{analysis_backup_id}', response_model = AnalysisBackupResponse)
 def get_analysis_backup(analysis_backup_id: int, db: Session = Depends(get_db)):
     analysis_backup = db.query(AnalysisBackup).filter(AnalysisBackup.id == analysis_backup_id).first()
@@ -34,7 +32,6 @@ def get_analysis_backup(analysis_backup_id: int, db: Session = Depends(get_db)):
     
     return analysis_backup
 
-# Rota para deletar o backup da análise
 @router.delete('/{analysis_backup_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_analysis_backup(analysis_backup_id: int, db: Session = Depends(get_db)):
     analysis_backup = db.query(AnalysisBackup).filter(AnalysisBackup.id == analysis_backup_id).first()

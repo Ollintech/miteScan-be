@@ -6,11 +6,10 @@ from schemas.bee_type import BeeTypeCreate, BeeTypeResponse, BeeTypeUpdate
 
 router = APIRouter(prefix = '/bee_types', tags = ['Bee Types'])
 
-# Rota de criação de tipo de abelha
 @router.post('/create', response_model = BeeTypeResponse, status_code = status.HTTP_201_CREATED)
 def create_bee_type(bee_type: BeeTypeCreate, db: Session = Depends(get_db)):
     if db.query(BeeType).filter(BeeType.name == bee_type.name).first():
-        raise HTTPException(status_code = 400, detail = 'Abelha já cadastrada.')
+        raise HTTPException(status_code = 400, detail = 'Tipo de abelha já cadastrado.')
     
     new_bee_type = BeeType(
         name = bee_type.name,
@@ -29,27 +28,25 @@ def get_all_bee_types(db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).all()
 
     if not bee_type:
-        raise HTTPException(status_code = 404, detail = 'Não existe nenhum tipo de abelha cadastrado.')
+        raise HTTPException(status_code = 404, detail = 'Tipo de abelha não cadastrado.')
     
     return bee_type
 
-# Rota que retorna os dados do tipo de abelha
 @router.get('/{bee_type_id}', response_model = BeeTypeResponse)
 def get_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
 
     if not bee_type:
-        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+        raise HTTPException(status_code = 404, detail = 'Tipo de abelha não encontrado.')
     
     return bee_type
 
-# Rota para atualizar um tipo de abelha ja existente
 @router.put('/{bee_type_id}', response_model = BeeTypeResponse)
 def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
 
     if not bee_type:
-        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+        raise HTTPException(status_code = 404, detail = 'Tipo de abelha não encontrado.')
 
     if bee_type_update.name:
         bee_type.name = bee_type_update.name
@@ -62,13 +59,12 @@ def update_bee_type(bee_type_id: int, bee_type_update: BeeTypeUpdate, db: Sessio
 
     return bee_type
 
-# Rota para deletar um tipo de abelha
 @router.delete('/{bee_type_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_bee_type(bee_type_id: int, db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).filter(BeeType.id == bee_type_id).first()
 
     if not bee_type:
-        raise HTTPException(status_code = 404, detail = 'Abelha não encontrada.')
+        raise HTTPException(status_code = 404, detail = 'Tipo de abelha não encontrado.')
 
     db.delete(bee_type)
     db.commit()

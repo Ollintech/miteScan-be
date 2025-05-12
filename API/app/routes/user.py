@@ -68,7 +68,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
     }
     
 @router.get("/profile", response_model = UserResponse)
-def profile_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def profile_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.get("/{user_id}", response_model=UserResponse)

@@ -7,7 +7,6 @@ from core.auth import require_access
 
 router = APIRouter(prefix='/hives', tags=['Hives'])
 
-# Rota para a criação de colmeias
 @router.post('/create', response_model=HiveResponse, status_code=status.HTTP_201_CREATED)
 def create_hive(hive: HiveCreate, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     if db.query(Hive).filter(
@@ -41,7 +40,6 @@ def get_all_hives(db: Session = Depends(get_db), user=Depends(require_access("ow
 
     return hive
 
-# Rota para obter os dados da colmeia
 @router.get('/{hive_id}', response_model=HiveResponse)
 def get_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager", "employee"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
@@ -51,8 +49,6 @@ def get_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_a
 
     return hive
 
-
-# Rota para atualizar os dados da colmeia
 @router.put('/{hive_id}', response_model=HiveResponse)
 def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
@@ -86,8 +82,6 @@ def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get
 
     return hive
 
-
-# Rota para deletar uma colmeia
 @router.delete('/{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()

@@ -7,7 +7,6 @@ from core.auth import require_access
 
 router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
 
-# Rota de criação de análise da colmeia
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager"))):
 
@@ -34,7 +33,6 @@ def get_all_hive_analyses(db: Session = Depends(get_db), user = Depends(require_
     
     return hive_analysis
 
-# Rota que mostra os dados da análise da colmeia
 @router.get('/{hive_analysis_id}', response_model = HiveAnalysisResponse)
 def get_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
     hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.id == hive_analysis_id).first()
@@ -44,7 +42,6 @@ def get_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db), user
     
     return hive_analysis
 
-# Rota para deletar a análise da colmeia
 @router.delete('/{hive_analysis_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager"))):
     hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.id == hive_analysis_id).first()

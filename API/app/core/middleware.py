@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from db.database import get_db
@@ -21,10 +21,6 @@ class ActiveUserMiddleware(BaseHTTPMiddleware):
                     if user and user.status is False:
                         return JSONResponse(status_code=403, content={"message": "Usuário inativo"})
             response = await call_next(request)
-
-            # response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-            # response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-            # response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
  
             return response
         except Exception as e:

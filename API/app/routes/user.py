@@ -9,7 +9,7 @@ from core.auth import (
     get_password_hash,
     create_access_token,
     authenticate_user,
-    verify_password
+    get_current_user
 )
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -66,6 +66,10 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
             "status": user.status
         }
     }
+    
+@router.get("/profile", response_model = UserResponse)
+def profile_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return current_user
 
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):

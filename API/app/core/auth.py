@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session, joinedload
-from db.database import SessionLocal
+from db.database import SessionLocal, get_db
 from core.config import settings
 from models.user import User
 
@@ -29,13 +29,6 @@ def create_access_token(data: dict, expires_delta: int = access_token_expire_min
     expire = datetime.utcnow() + timedelta(minutes=expires_delta)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, secret_key, algorithm=algorithm)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 def authenticate_user(email: str, password: str, db: Session):
     user = db.query(User).filter(User.email == email).first()

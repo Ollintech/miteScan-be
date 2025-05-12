@@ -6,10 +6,8 @@ from models.company import Company
 from schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
 router = APIRouter(prefix = '/companies', tags = ['Companies'])
-
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 
-# Rota de criação de empresa
 @router.post('/create', response_model = CompanyResponse, status_code = status.HTTP_201_CREATED)
 def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     if db.query(Company).filter(Company.cnpj == company.cnpj).first():
@@ -26,7 +24,6 @@ def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
 
     return new_company
 
-# Rota para obter os dados da empresa
 @router.get('/{company_id}', response_model = CompanyResponse)
 def get_company(company_id: int, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()
@@ -36,7 +33,6 @@ def get_company(company_id: int, db: Session = Depends(get_db)):
     
     return company
 
-# Rota para atualizar os dados da empresa
 @router.put('/{company_id}', response_model = CompanyResponse)
 def update_company(company_id: int, company_update: CompanyUpdate, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()
@@ -57,7 +53,6 @@ def update_company(company_id: int, company_update: CompanyUpdate, db: Session =
 
     return company
 
-# Rota para deletar uma empresa
 @router.delete('/{company_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_company(company_id: int, db: Session = Depends(get_db)):
     company = db.query(Company).filter(Company.id == company_id).first()

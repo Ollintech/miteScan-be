@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter, status
+from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.access import Access
@@ -11,7 +11,7 @@ def get_all_accesses(db: Session = Depends(get_db)):
     accesses = db.query(Access).all()
 
     if not accesses:
-        raise HTTPException(status_code = 404, detail = 'Acessos não cadastrados.')
+        raise HTTPException(status_code = 404, detail = 'Não existe nenhum acesso cadastrado.')
 
     return accesses
 

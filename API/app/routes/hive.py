@@ -29,7 +29,7 @@ def create_hive(hive: HiveCreate, db: Session = Depends(get_db), user=Depends(re
     db.commit()
     db.refresh(new_hive)
 
-    return {"message": f"Colmeia criada com sucesso pelo usuário {user.name} com o acesso {user.access.name}"}
+    return new_hive
 
 @router.get('/all', response_model= list[HiveResponse])
 def get_all_hives(db: Session = Depends(get_db), user=Depends(require_access("owner", "manager", "employee"))):

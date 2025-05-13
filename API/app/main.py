@@ -47,6 +47,7 @@ async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
     try:
         sensor_data = SensorRead(**data)
         receive_data(sensor_data, db)
+
         print(f"Dados recebidos e processados.")
     except Exception as e:
         print(f"Erro ao processar os dados: {e}")

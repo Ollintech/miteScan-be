@@ -5,7 +5,7 @@ from models.analysis_backup import AnalysisBackup
 from schemas.analysis_backup import AnalysisBackupCreate, AnalysisBackupResponse
 from datetime import datetime
 
-router = APIRouter(prefix = '/analysis_backup', tags = ['Analysis Backup'])
+router = APIRouter(prefix = '/analyses_backups', tags = ['Analyses Backups'])
 
 @router.post('/create', response_model = AnalysisBackupResponse, status_code = status.HTTP_201_CREATED)
 def create_analysis_backup(analysis_backup: AnalysisBackupCreate, db: Session = Depends(get_db)):

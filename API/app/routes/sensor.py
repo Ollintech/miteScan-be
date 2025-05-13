@@ -5,19 +5,19 @@ from models.hive import Hive
 from models.sensor import Sensor
 from schemas.sensor import SensorRead, SensorResponse
 
-router = APIRouter(prefix='/sensor', tags=['Sensor'])
+router = APIRouter(prefix='/sensors', tags=['Sensors'])
 
 @router.post("/", response_model=SensorResponse)
-def receive_data(sensor: SensorRead, db: Session = Depends(get_db)):
-    hive = db.query(Hive).filter(Hive.id == sensor.hive_id).first()
+def receive_data(sensor_data: SensorRead, db: Session = Depends(get_db)):
+    hive = db.query(Hive).filter(Hive.id == sensor_data.hive_id).first()
 
     if not hive: 
         raise HTTPException(status_code=404, detail="Colmeia não encontrada")
     
     new_sensor_reading = Sensor(
-        hive_id=sensor.hive_id,
-        temperature=sensor.temperature,
-        humidity=sensor.humidity
+        hive_id=sensor_data.hive_id,
+        temperature=sensor_data.temperature,
+        humidity=sensor_data.humidity
     )
 
     try:
@@ -25,8 +25,8 @@ def receive_data(sensor: SensorRead, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_sensor_reading)
 
-        hive.humidity = sensor.humidity
-        hive.temperature = sensor.temperature
+        hive.humidity = sensor_data.humidity
+        hive.temperature = sensor_data.temperature
 
         db.commit()
         db.refresh(hive)

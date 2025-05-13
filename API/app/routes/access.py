@@ -4,7 +4,7 @@ from db.database import get_db
 from models.access import Access
 from schemas.access import AccessResponse
 
-router = APIRouter(prefix = '/access', tags = ['Accesss'])
+router = APIRouter(prefix = '/accesses', tags = ['Accesses'])
 
 @router.get('/all', response_model = list[AccessResponse])
 def get_all_accesses(db: Session = Depends(get_db)):

@@ -7,7 +7,7 @@ from seed import seed_data
 from mqtt_handler import run_mqtt_in_background
 from sqlalchemy.orm import Session
 from schemas.sensor import SensorRead
-from routes.sensor import receber_dados
+from routes.sensor import receive_data
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -46,7 +46,7 @@ async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
 
     try:
         sensor_data = SensorRead(**data)
-        receber_dados(sensor_data, db)
+        receive_data(sensor_data, db)
         print(f"Dados recebidos e processados.")
     except Exception as e:
         print(f"Erro ao processar os dados: {e}")

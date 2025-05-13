@@ -8,14 +8,14 @@ from schemas.sensor import SensorRead, SensorResponse
 router = APIRouter(prefix='/sensor', tags=['Sensor'])
 
 @router.post("/", response_model=SensorResponse)
-def receber_dados(sensor: SensorRead, db: Session = Depends(get_db)):
-    colmeia = db.query(Hive).filter(Hive.id == sensor.colmeia_id).first()
+def receive_data(sensor: SensorRead, db: Session = Depends(get_db)):
+    hive = db.query(Hive).filter(Hive.id == sensor.hive_id).first()
 
-    if not colmeia: 
+    if not hive: 
         raise HTTPException(status_code=404, detail="Colmeia não encontrada")
     
     new_sensor_reading = Sensor(
-        colmeia_id=sensor.colmeia_id,
+        hive_id=sensor.hive_id,
         temperature=sensor.temperature,
         humidity=sensor.humidity
     )
@@ -24,6 +24,13 @@ def receber_dados(sensor: SensorRead, db: Session = Depends(get_db)):
         db.add(new_sensor_reading)
         db.commit()
         db.refresh(new_sensor_reading)
+
+        hive.humidity = sensor.humidity
+        hive.temperature = sensor.temperature
+
+        db.commit()
+        db.refresh(hive)
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Erro ao salvar os dados no banco")

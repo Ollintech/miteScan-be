@@ -1,7 +1,8 @@
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
+from models.sensor import Sensor
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 from core.auth import require_access
 
@@ -82,14 +83,27 @@ def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get
 
     return hive
 
-@router.delete('/{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
+@router.delete('/{hive_id}', status_code=status.HTTP_200_OK)
+def delete_hive(hive_id: int, confirm: bool = Query(False), db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
+    
+    sensores = db.query(Sensor).filter(Sensor.hive_id == hive_id).all()
 
-    db.delete(hive)
-    db.commit()
-
-    return {'message': f'Colmeia deletada com sucesso pelo usuário {user.name}!'}
+    if sensores and not confirm:
+        return {
+            "message": f"A colmeia {hive_id} tem {len(sensores)} sensores associados. Deseja excluí-la mesmo assim?",
+            "require_confirmation": True
+        }
+    
+    try:
+        if sensores:
+            db.query(Sensor).filter(Sensor.hive_id == hive_id).delete(synchronize_session=False)
+        db.delete(hive)
+        db.commit()
+        return {'message': f'Colmeia {hive_id} e os sensores associados foram excluídos com sucesso!'}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f'Erro ao excluir colmeia: {str(e)}')

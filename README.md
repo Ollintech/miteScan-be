@@ -38,7 +38,7 @@ Esse repositório contém o back-end do projeto MiteScan, que está sendo desenv
 <br>
 Por fim, rode o projeto com:
 
-`python app/main.py`
+`uvicorn main:app --reload`
 
 Quando terminar: 
 

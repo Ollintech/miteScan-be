@@ -13,7 +13,7 @@ Esse repositório contém o back-end do projeto MiteScan, que está sendo desenv
 
 - Cole o código a seguir no terminal, caso necessário altere as informações.
 
-`docker run --name meu-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -e POSTGRES_DB=mitescan -p 5440:5432 -d postgres`
+`docker run --name mitescan -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -e POSTGRES_DB=mitescan -p 5440:5432 -d postgres`
 
 - Crie uma cópia do arquivo ".env.example", com o nome ".env" e atualize os dados de acordo com os de criação do Docker.
 
@@ -22,12 +22,6 @@ Esse repositório contém o back-end do projeto MiteScan, que está sendo desenv
 
 - Dentro da IDE, no terminal do repositório, entre na pasta 'API' e execute os comandos a seguir:
 
-  
-`pip install -r requirements.txt` - Instala todas as dependências do projeto contidas no arquivo requirements.txt. <br>
-
-
-- Entre na pasta 'app' e execute os comandos a seguir:
-
 
 `python -m venv ./venv` - Cria o arquivo da venv, que é um ambiente isolado para os pacotes usados no projeto.<br>
 
@@ -35,8 +29,11 @@ Esse repositório contém o back-end do projeto MiteScan, que está sendo desenv
 `./venv/Scripts/activate` - Ativa o ambiente venv.<br>
 
 
+`pip install -r requirements.txt` - Instala todas as dependências do projeto contidas no arquivo requirements.txt. <br>
+
+
 <br>
-Por fim, rode o projeto com:
+Por fim, entre na pasta 'app' e rode o projeto com:
 
 `uvicorn main:app --reload`
 

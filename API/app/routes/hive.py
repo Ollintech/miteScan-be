@@ -34,7 +34,7 @@ def create_hive(hive: HiveCreate, db: Session = Depends(get_db), user=Depends(re
 
 @router.get('/all', response_model= list[HiveResponse])
 def get_all_hives(db: Session = Depends(get_db), user=Depends(require_access("owner", "manager", "employee"))):
-    hive = db.query(Hive).all()
+    hive = db.query(Hive).filter(Hive.user_id == user.id).all()
 
     if not hive:
         raise HTTPException(status_code=404, detail='Não existem colmeias cadastradas.')

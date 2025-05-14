@@ -5,6 +5,7 @@ from models import user as UserModel
 from models import access as AccessModel
 from models import bee_type as BeeTypeModel
 from models import hive as HiveModel
+from models import sensor as SensorModel
 from models import hive_analysis as AnalysisModel
 from datetime import datetime
 from core.auth import get_password_hash
@@ -133,6 +134,31 @@ def seed_data():
             else:
                 hive["id"] = existing_hive.id
                 print(f"Colmeia localizada em ({hive['location_lat'], hive['location_lng']}) já existe.")
+                
+        sensors = [
+            {"hive_id": hives[0]["id"], "humidity": 65.0, "temperature": 30.5},
+            {"hive_id": hives[1]["id"], "humidity": 65.0, "temperature": 30.5},
+            {"hive_id": hives[2]["id"], "humidity": 65.0, "temperature": 30.5},
+            {"hive_id": hives[3]["id"], "humidity": 65.0, "temperature": 30.5},
+        ]
+        
+        for sensor in sensors:
+            existing_sensor = db.query(SensorModel.Sensor).filter(SensorModel.Sensor.hive_id == sensor["hive_id"]).first()
+            
+            if not existing_sensor:
+                new_sensor = SensorModel.Sensor(
+                    hive_id=sensor["hive_id"],
+                    humidity=sensor["humidity"],
+                    temperature=sensor["temperature"]
+                )
+                db.add(new_sensor)
+                db.commit()
+                print(f"Leitura do sensor da colmeia {sensor['hive_id']} criada com sucesso.")
+                sensor["id"] = new_sensor.id
+                
+            else:
+                sensor["id"] = existing_sensor.id
+                print(f"Leitura do sensor da colmeia {sensor['hive_id']} já existe.")
 
         analyses = [
             {"hive_id": hives[0]["id"], "user_id": users[0]["id"], "image_path": "image.jpg", "varroa_detected": True, "detection_confidence": 0.92, "created_at": datetime.utcnow()},

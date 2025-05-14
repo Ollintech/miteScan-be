@@ -94,20 +94,20 @@ def delete_hive(hive_id: int, confirm: bool = Query(False), db: Session = Depend
 
     if sensores and not confirm:
         return {
-            "message": f"A colmeia {hive_id} tem {len(sensores)} leituras de sensores associadoa. Deseja excluí-la mesmo assim?",
+            "message": f"A colmeia {hive_id} possui {len(sensores)} leituras de sensores associadoa. Deseja excluí-la mesmo assim?",
             "require_confirmation": True
         }
     
-    if confirm:
-        for sensor in sensores:
-            db.delete(sensor)
-            db.commit()
-            db.refresh(sensor)
-
     try:
+        if confirm and sensores:
+            for sensor in sensores:
+                db.delete(sensor)
+            
         db.delete(hive)
         db.commit()
+        
         return {'message': f'Colmeia {hive_id} e as leituras de sensores associadas foram excluídas com sucesso!'}
+    
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f'Erro ao excluir colmeia: {str(e)}')

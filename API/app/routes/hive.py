@@ -94,7 +94,7 @@ def delete_hive(hive_id: int, confirm: bool = Query(False), db: Session = Depend
 
     if sensores and not confirm:
         return {
-            "message": f"A colmeia {hive_id} possui {len(sensores)} leituras de sensores associadoa. Deseja excluí-la mesmo assim?",
+            "message": f"A colmeia {hive_id} possui {len(sensores)} leituras de sensores associados. Deseja excluí-la mesmo assim?",
             "require_confirmation": True
         }
     

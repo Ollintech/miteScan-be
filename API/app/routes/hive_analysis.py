@@ -26,10 +26,19 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
 @router.get('/all', response_model = list[HiveAnalysisResponse])
 def get_all_hive_analyses(db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
-    hive_analysis = db.query(HiveAnalysis).all()
+    hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.user_id == user.id).all()
 
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Não há registros de analises de colmeias.')
+    
+    return hive_analysis
+
+@router.get('/hive:{hive_id}', response_model = HiveAnalysisResponse)
+def get_hive_analysis(hive_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
+    hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).last()
+
+    if not hive_analysis:
+        raise HTTPException(status_code = 404, detail = 'Análise da colmeia não encontrada.')
     
     return hive_analysis
 

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from db.database import get_db
 from models.hive_analysis import HiveAnalysis
 from schemas.hive_analysis import HiveAnalysisCreate, HiveAnalysisResponse
@@ -34,8 +35,8 @@ def get_all_hive_analyses(db: Session = Depends(get_db), user = Depends(require_
     return hive_analysis
 
 @router.get('/hive:{hive_id}', response_model = HiveAnalysisResponse)
-def get_hive_analysis(hive_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
-    hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).last()
+def get_last_analysis_by_hive(hive_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
+    hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).order_by(desc(HiveAnalysis.created_at)).first()
 
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Análise da colmeia não encontrada.')

@@ -1,10 +1,20 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
-from db.database import Base
+from app import db
 
-class BeeType(Base):
+class BeeType(db.Model):
     __tablename__ = 'bee_types'
 
-    id = Column(Integer, primary_key = True)
-    name = Column(String(100), unique = True, nullable = False)
-    description = Column(Text, nullable = False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(200), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    def __repr__(self):
+        return f'<BeeType {self.name}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'user_id': self.user_id
+        }

@@ -1,10 +1,20 @@
-from .access import Access
-from .company import Company
+# Import all models to ensure they are registered with SQLAlchemy
 from .user import User
-from .bee_type import BeeType
+from .company import Company
+from .access import Access
 from .hive import Hive
-from .hive_analysis import HiveAnalysis
+from .bee_type import BeeType
+from .sensor import Sensor
 from .analysis_backup import AnalysisBackup
-from .relationships import configure_relationships
+from .hive_analysis import HiveAnalysis
 
-configure_relationships()
+__all__ = [
+    'User',
+    'Company', 
+    'Access',
+    'Hive',
+    'BeeType',
+    'Sensor',
+    'AnalysisBackup',
+    'HiveAnalysis'
+]

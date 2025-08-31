@@ -1,9 +1,18 @@
-from sqlalchemy import Column, Integer, String
-from db.database import Base
+from app import db
 
-class Access(Base):
+class Access(db.Model):
     __tablename__ = 'accesses'
 
-    id = Column(Integer, primary_key = True)
-    name = Column(String(100), nullable = False)
-    description = Column(String(255), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        return f'<Access {self.name}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description
+        }

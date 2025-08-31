@@ -1,13 +1,28 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from db.database import Base
+from app import db
 
-class Company(Base):
+class Company(db.Model):
     __tablename__ = 'companies'
 
-    id = Column(Integer, primary_key = True)
-    name = Column(String(200), nullable = False)
-    cnpj = Column(String(14), nullable = False)
-    email = Column(String(100),unique = True, nullable = False)
-    password_hash = Column(String(255), nullable = False)
-    last_login = Column(DateTime, nullable = True)
-    access_id = Column(Integer, ForeignKey('accesses.id'), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    cnpj = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(200), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    last_login = db.Column(db.DateTime, nullable=True)
+    access_id = db.Column(db.Integer, db.ForeignKey('accesses.id'), nullable=False)
+    
+    # Relationships
+    access = db.relationship('Access', backref='companies')
+
+    def __repr__(self):
+        return f'<Company {self.name}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'cnpj': self.cnpj,
+            'email': self.email,
+            'last_login': self.last_login.isoformat() if self.last_login else None,
+            'access_id': self.access_id
+        }

@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
     @classmethod
     def password_length(cls, v):
         if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
+            raise ValueError('A senha deve ter pelo menos 8 caracteres')
         return v
 
 class UserResponse(BaseModel):

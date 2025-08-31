@@ -10,7 +10,12 @@ create table accesses(
 create table companies(
     id serial primary key,
     name varchar(200) not null,
-    cnpj int not null
+    cnpj int not null,
+    email varchar(200) not null,
+    password_hash varchar(100) not null,
+    last_login timestamp,
+    access_id int not null,
+    foreign key (access_id) references accesses(id)
 )
 
 create table users(

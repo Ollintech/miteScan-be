@@ -134,7 +134,7 @@ def seed_data():
             else:
                 hive["id"] = existing_hive.id
                 print(f"Colmeia localizada em ({hive['location_lat'], hive['location_lng']}) já existe.")
-                
+       
         sensors = [
             {"hive_id": hives[0]["id"], "humidity": 65.0, "temperature": 30.5},
             {"hive_id": hives[1]["id"], "humidity": 65.0, "temperature": 30.5},

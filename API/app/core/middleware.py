@@ -23,6 +23,7 @@ class ActiveUserMiddleware(BaseHTTPMiddleware):
                         return JSONResponse(status_code=403, content={"message": "Usuário inativo"})
                     
             response = await call_next(request)
+
             return response
         
         except Exception as e:

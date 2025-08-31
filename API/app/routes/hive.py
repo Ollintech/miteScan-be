@@ -83,8 +83,9 @@ def update_hive(hive_id: int, hive_update: HiveUpdate, db: Session = Depends(get
 
     return hive
 
-@router.delete('/{hive_id}', status_code=status.HTTP_200_OK)
-def delete_hive(hive_id: int, confirm: bool = Query(False), db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
+@router.delete('/{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_hive(hive_id: int, db: Session = Depends(get_db), user=Depends(require_access("owner", "manager"))):
+
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
 
     if not hive:

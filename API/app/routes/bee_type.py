@@ -28,7 +28,7 @@ def get_all_bee_types(db: Session = Depends(get_db)):
     bee_type = db.query(BeeType).all()
 
     if not bee_type:
-        raise HTTPException(status_code = 404, detail = 'Não existe nenhum tipo de abelha cadastrado.')
+        raise HTTPException(status_code = 404, detail = 'Tipo de abelha não cadastrado.')
     
     return bee_type
 

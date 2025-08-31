@@ -5,7 +5,7 @@ from models.analysis_backup import AnalysisBackup
 from schemas.analysis_backup import AnalysisBackupCreate, AnalysisBackupResponse
 from datetime import datetime
 
-router = APIRouter(prefix = '/analysis_backup', tags = ['Analysis Backup'])
+router = APIRouter(prefix = '/analyses_backups', tags = ['Analyses Backups'])
 
 @router.post('/create', response_model = AnalysisBackupResponse, status_code = status.HTTP_201_CREATED)
 def create_analysis_backup(analysis_backup: AnalysisBackupCreate, db: Session = Depends(get_db)):
@@ -28,7 +28,7 @@ def get_analysis_backup(analysis_backup_id: int, db: Session = Depends(get_db)):
     analysis_backup = db.query(AnalysisBackup).filter(AnalysisBackup.id == analysis_backup_id).first()
 
     if not analysis_backup:
-        raise HTTPException(status_code = 404, detail = 'Análise de Backup não encontrada.')
+        raise HTTPException(status_code = 404, detail = 'Backup de análise não encontrado.')
     
     return analysis_backup
 
@@ -37,9 +37,9 @@ def delete_analysis_backup(analysis_backup_id: int, db: Session = Depends(get_db
     analysis_backup = db.query(AnalysisBackup).filter(AnalysisBackup.id == analysis_backup_id).first()
 
     if not analysis_backup:
-        raise HTTPException(status_code = 404, detail = 'Análise de Backup não encontrada.')
+        raise HTTPException(status_code = 404, detail = 'Backup de análise não encontrado.')
     
     db.delete(analysis_backup)
     db.commit()
 
-    return {'message' : 'Análise de Backup deletada com sucesso!'}
+    return {'message' : 'Backup de análise deletado com sucesso!'}

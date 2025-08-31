@@ -4,14 +4,14 @@ from db.database import get_db
 from models.access import Access
 from schemas.access import AccessResponse
 
-router = APIRouter(prefix = '/access', tags = ['Accesss'])
+router = APIRouter(prefix = '/accesses', tags = ['Accesses'])
 
 @router.get('/all', response_model = list[AccessResponse])
 def get_all_accesses(db: Session = Depends(get_db)):
     accesses = db.query(Access).all()
 
     if not accesses:
-        raise HTTPException(status_code = 404, detail = 'Acessos não cadastrados.')
+        raise HTTPException(status_code = 404, detail = 'Não existe nenhum acesso cadastrado.')
 
     return accesses
 

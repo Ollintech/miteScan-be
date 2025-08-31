@@ -1,15 +1,13 @@
 from fastapi import FastAPI, Depends
-import uvicorn
+import uvicorn, os
 from routes import user, hive, bee_type, analysis_backup, hive_analysis, access, company, sensor
 from db.database import Base, engine, get_db
 from core.middleware import ActiveUserMiddleware
 from seed import seed_data
-import asyncio
 from mqtt_handler import run_mqtt_in_background
-from routes.sensor import receber_dados
 from sqlalchemy.orm import Session
 from schemas.sensor import SensorRead
-import os
+from routes.sensor import receive_data
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,6 +20,8 @@ async def lifespan(app: FastAPI):
     print("Aplicação desligando...")
     
 app = FastAPI(lifespan=lifespan)
+Base.metadata.create_all(bind=engine)
+app.add_middleware(ActiveUserMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,10 +30,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-Base.metadata.create_all(bind=engine)
-
-app.add_middleware(ActiveUserMiddleware)
 
 app.include_router(company.router)
 app.include_router(user.router)
@@ -50,7 +46,8 @@ async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
 
     try:
         sensor_data = SensorRead(**data)
-        receber_dados(sensor_data, db)
+        receive_data(sensor_data, db)
+
         print(f"Dados recebidos e processados.")
     except Exception as e:
         print(f"Erro ao processar os dados: {e}")

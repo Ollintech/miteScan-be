@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive_analysis import HiveAnalysis
+from models.hive import Hive
 from schemas.hive_analysis import HiveAnalysisCreate, HiveAnalysisResponse
 from core.auth import require_access
 
@@ -26,16 +27,24 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
 @router.get('/all', response_model = list[HiveAnalysisResponse])
 def get_all_hive_analyses(db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
-    hive_analysis = db.query(HiveAnalysis).all()
+    hive_analysis = db.query(HiveAnalysis).join(Hive).filter(HiveAnalysis.user_id == user.id).all()
 
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Não há registros de analises de colmeias.')
     
     return hive_analysis
 
+@router.get('/hive/{hive_id}', response_model = HiveAnalysisResponse)
+def get_last_analysis_by_hive(hive_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
+    hive_analysis = db.query(HiveAnalysis).join(Hive).filter(HiveAnalysis.hive_id == hive_id).order_by(HiveAnalysis.created_at.desc()).first()
+    if not hive_analysis:
+        raise HTTPException(status_code = 404, detail = 'Análise da colmeia não encontrada.')
+    
+    return hive_analysis
+
 @router.get('/{hive_analysis_id}', response_model = HiveAnalysisResponse)
 def get_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
-    hive_analysis = db.query(HiveAnalysis).filter(HiveAnalysis.id == hive_analysis_id).first()
+    hive_analysis = db.query(HiveAnalysis).join(Hive).filter(HiveAnalysis.id == hive_analysis_id).first()
 
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Análise da colmeia não encontrada.')

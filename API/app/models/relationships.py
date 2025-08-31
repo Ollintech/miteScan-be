@@ -4,6 +4,7 @@ from .company import Company
 from .user import User
 from .bee_type import BeeType
 from .hive import Hive
+from .sensor import Sensor
 from .hive_analysis import HiveAnalysis
 from .analysis_backup import AnalysisBackup
 
@@ -31,6 +32,9 @@ def configure_relationships():
 
     BeeType.hives = relationship('Hive', back_populates = 'bee_type', cascade = "all, delete")
     Hive.bee_type = relationship('BeeType', back_populates = 'hives')
+    
+    Hive.sensors = relationship("Sensor", back_populates = "hive", cascade = "all, delete-orphan")
+    Sensor.hive = relationship("Hive", back_populates = "sensors")
 
     Hive.analyses = relationship("HiveAnalysis", back_populates = "hive", cascade = "all, delete-orphan")
     HiveAnalysis.hive = relationship("Hive", back_populates = "analyses")

@@ -9,7 +9,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime
 
 router = APIRouter(prefix = '/companies', tags = ['Companies'])
-
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 
 @router.post('/register', response_model = CompanyResponse, status_code = status.HTTP_201_CREATED)

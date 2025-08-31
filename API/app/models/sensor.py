@@ -2,9 +2,9 @@ from sqlalchemy import Column, Integer, Float, ForeignKey
 from db.database import Base
 
 class Sensor(Base):
-    __tablename__ = 'sensores'
+    __tablename__ = 'sensors'
 
     id = Column(Integer, primary_key=True)
-    colmeia_id = Column(Integer, ForeignKey('hives.id'))
+    hive_id = Column(Integer, ForeignKey('hives.id'), nullable = False)
     temperature = Column(Float, nullable=False)
     humidity = Column(Float, nullable=False)

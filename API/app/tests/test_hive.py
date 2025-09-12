@@ -1,4 +1,4 @@
-from models.user import User
+from API.app.models.user_root import User
 from models.access import Access
 from models.bee_type import BeeType
 from models.hive import Hive

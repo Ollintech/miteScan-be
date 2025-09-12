@@ -6,8 +6,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session, joinedload
 from db.database import SessionLocal, get_db
 from core.config import settings
-from models.user import User
-from models.company import Company
+from API.app.models.user_root import User
+from API.app.models.users_associated import Company
 from typing import Type, Union, Optional
 
 secret_key = settings.secret_key

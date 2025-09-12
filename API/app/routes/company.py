@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, APIRouter, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from db.database import get_db
-from models.company import Company
+from API.app.models.users_associated import Company
 from schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 from core.auth import (get_password_hash, authenticate_company, create_access_token, get_current_company)
 from fastapi.security import OAuth2PasswordRequestForm

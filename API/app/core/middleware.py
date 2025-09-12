@@ -4,7 +4,7 @@ from starlette.responses import JSONResponse
 from db.database import get_db
 from sqlalchemy.orm import Session
 import jwt
-from models.user import User
+from API.app.models.user_root import User
 
 class ActiveUserMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

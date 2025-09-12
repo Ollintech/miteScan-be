@@ -1,4 +1,4 @@
-from models.company import Company
+from API.app.models.users_associated import Company
 from tests.mock_data import mock_company, mock_company_response
 
 

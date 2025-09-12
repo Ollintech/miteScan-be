@@ -1,4 +1,4 @@
-from models.user import User
+from API.app.models.user_root import User
 from models.bee_type import BeeType
 
 def create_user(db):

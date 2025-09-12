@@ -1,7 +1,7 @@
 import pytest
-from models.user import User
+from API.app.models.user_root import User
 from models.access import Access
-from models.company import Company
+from API.app.models.users_associated import Company
 from core.auth import get_password_hash
 from tests.mock_data import mock_user, mock_user_response, mock_user_with_hash, mock_access_response, mock_company_response
 

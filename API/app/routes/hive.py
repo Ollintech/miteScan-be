@@ -2,7 +2,7 @@ from fastapi import Depends, APIRouter, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
-from models.sensor import Sensor
+from API.app.models.sensor_readings import Sensor
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 from core.auth import require_access
 

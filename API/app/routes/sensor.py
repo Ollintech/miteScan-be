@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
-from models.sensor import Sensor
+from API.app.models.sensor_readings import Sensor
 from schemas.sensor import SensorRead, SensorResponse
 
 router = APIRouter(prefix='/sensors', tags=['Sensors'])

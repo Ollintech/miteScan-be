@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from models.hive import Hive
-from models.sensor import Sensor
+from API.app.models.sensor_readings import Sensor
 
 # Fixture para criar uma colmeia no banco de dados de teste
 @pytest.fixture

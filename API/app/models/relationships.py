@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from .access import Access
-from .users_associated import Company
-from .user_root import User
+from .users_associated import UserAssociated
+from .user_root import UserRoot
 from .bee_type import BeeType
 from .hive import Hive
 from .sensor_readings import Sensor
@@ -9,26 +9,26 @@ from .hive_analysis import HiveAnalysis
 from .analysis_backup import AnalysisBackup
 
 def configure_relationships():
-    Access.users = relationship('User', back_populates = 'access', cascade = "all, delete")
-    User.access = relationship('Access', back_populates = 'users')
+    Access.users_root = relationship('UserRoot', back_populates = 'access', cascade = "all, delete")
+    UserRoot.access = relationship('Access', back_populates = 'users_root')
     
-    Access.companies = relationship('Company', back_populates = 'access', cascade = "all, delete")
-    Company.access = relationship('Access', back_populates = 'companies')
+    Access.users_associated = relationship('UserAssociated', back_populates = 'access', cascade = "all, delete")
+    UserAssociated.access = relationship('Access', back_populates = 'users_associated')
 
-    Company.users = relationship('User', back_populates = 'company', cascade = "all, delete")
-    User.company = relationship('Company', back_populates = 'users')
+    UserRoot.users_associated = relationship('UserAssociated', back_populates = 'user_root', cascade = "all, delete")
+    UserAssociated.user_root = relationship('UserRoot', back_populates = 'users_associated')
 
-    User.bee_types = relationship("BeeType", back_populates = "user", cascade = "all, delete-orphan")
-    BeeType.user = relationship('User', back_populates = 'bee_types')
+    UserRoot.bee_types = relationship("BeeType", back_populates = "user_root", cascade = "all, delete-orphan")
+    BeeType.user_root = relationship('UserRoot', back_populates = 'bee_types')
 
-    User.hives = relationship('Hive', back_populates = 'owner', cascade = "all, delete")
-    Hive.owner = relationship('User', back_populates = 'hives')
+    UserRoot.hives = relationship('Hive', back_populates = 'owner', cascade = "all, delete")
+    Hive.owner = relationship('UserRoot', back_populates = 'hives')
 
-    User.analysis = relationship('HiveAnalysis', back_populates = 'user', cascade = "all, delete")
-    HiveAnalysis.user = relationship('User', back_populates = 'analysis')
+    UserRoot.analysis = relationship('HiveAnalysis', back_populates = 'user_root', cascade = "all, delete")
+    HiveAnalysis.user_root = relationship('UserRoot', back_populates = 'analysis')
 
-    User.backups = relationship('AnalysisBackup', back_populates='user', cascade = "all, delete")
-    AnalysisBackup.user = relationship('User', back_populates='backups')
+    UserRoot.backups = relationship('AnalysisBackup', back_populates='user_root', cascade = "all, delete")
+    AnalysisBackup.user_root = relationship('UserRoot', back_populates='backups')
 
     BeeType.hives = relationship('Hive', back_populates = 'bee_type', cascade = "all, delete")
     Hive.bee_type = relationship('BeeType', back_populates = 'hives')

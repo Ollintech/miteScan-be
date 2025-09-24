@@ -4,7 +4,7 @@ from starlette.responses import JSONResponse
 from db.database import get_db
 from sqlalchemy.orm import Session
 import jwt
-from API.app.models.user_root import User
+from models.user_root import UserRoot
 
 class ActiveUserMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -17,14 +17,14 @@ class ActiveUserMiddleware(BaseHTTPMiddleware):
                     db: Session = next(get_db())
                     payload = jwt.decode(token, options={"verify_signature": False})
                     email = payload.get("sub")
-                    user = db.query(User).filter(User.email == email).first()
-                    
-                    if user and user.status is False:
+                    user_root = db.query(UserRoot).filter(UserRoot.email == email).first()
+
+                    if user_root and user_root.status is False:
                         return JSONResponse(status_code=403, content={"message": "Usuário inativo"})
-                    
+
             response = await call_next(request)
 
             return response
-        
+
         except Exception as e:
-            return JSONResponse(status_code=401, content={"message": "Erro de autenticação"})
+            return JSONResponse(status_code=401, content={"message": f"Erro de autenticação: {str(e)}"})

@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from API.app.models import users_associated as CompanyModel
-from API.app.models import user_root as UserModel
+from models import users_associated as CompanyModel
+from models import user_root as UserModel
 from models import access as AccessModel
 from models import bee_type as BeeTypeModel
 from models import hive as HiveModel
-from API.app.models import sensor_readings as SensorModel
+from models import sensor_readings as SensorModel
 from models import hive_analysis as AnalysisModel
 from datetime import datetime
 from core.auth import get_password_hash

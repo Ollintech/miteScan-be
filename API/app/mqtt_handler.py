@@ -2,7 +2,7 @@ import asyncio
 import json
 import requests
 import paho.mqtt.client as mqtt
-import os
+import os, multiprocessing
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,12 +32,18 @@ def start_mqtt():
     try:
         print(f"🔌 Conectando ao broker {MQTT_BROKER}:{MQTT_PORT}...")
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.loop_start()
+        client.loop_forever()  # Use loop_forever instead of loop_start for better control
     except Exception as e:
         print(f"❌ Falha ao conectar ao broker MQTT: {e}")
 
-
 async def run_mqtt_in_background():
-    start_mqtt()
+    # Run MQTT in a separate thread to avoid blocking
+    import threading
+    mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
+    mqtt_thread.start()
+    await asyncio.sleep(0)  # Yield control to allow other tasks to run
+    # Run in a separate process to avoid conflicts
+    process = multiprocessing.Process(target=start_mqtt)
+    process.start()
     await asyncio.sleep(0) 
 

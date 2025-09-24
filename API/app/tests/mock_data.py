@@ -18,50 +18,62 @@ def mock_access_response():
     }
 
 
-# COMPANY
-def mock_company():
-    return {
-        "name": "Mock Company",
-        "cnpj": "12345678000100"
-    }
-
-
-def mock_company_response():
-    return {
-        "id": 1,
-        "name": "Mock Company",
-        "cnpj": "12345678000100"
-    }
-
-
-# USER
-def mock_user(access_id=1, company_id=1):
+# USER ROOT
+def mock_user_root(access_id=1):
     return {
         "name": "Mock User",
         "email": "mockuser@example.com",
         "password": "securePass123",
-        "access_id": access_id,
-        "company_id": company_id
+        "access_id": access_id
     }
 
 
-def mock_user_response():
+def mock_user_root_response():
     return {
         "id": 1,
         "name": "Mock User",
         "email": "mockuser@example.com",
         "status": True,
-        "access_id": 1,
-        "company_id": 1
+        "access_id": 1
     }
     
     
-def mock_user_with_hash():
-    user_data = mock_user()  # Gera os dados do usuário
+def mock_user_root_with_hash():
+    user_root_data = mock_user_root()  # Gera os dados do usuário
     password = "securePass123"  # Senha fictícia
-    user_data["password"] = password  # Adiciona a senha no mock
-    user_data["password_hash"] = get_password_hash(password)  # Gera o hash da senha
-    return user_data
+    user_root_data["password"] = password  # Adiciona a senha no mock
+    user_root_data["password_hash"] = get_password_hash(password)  # Gera o hash da senha
+    return user_root_data
+    
+
+# USER ASSOCIATED
+def mock_user_associated(access_id=1, user_id=1):
+    return {
+        "name": "Mock User Associated",
+        "email": "mockuser@example.com",
+        "password": "securePass123",
+        "access_id": access_id,
+        "user_id": user_id
+    }
+
+
+def mock_user_associated_response():
+    return {
+        "id": 1,
+        "name": "Mock User Associated",
+        "email": "mockuser@example.com",
+        "password": "securePass123",
+        "access_id": 1,
+        "user_id": 1
+    }
+    
+    
+def mock_user_associated_with_hash():
+    user_root_data = mock_user()  # Gera os dados do usuário
+    password = "securePass123"  # Senha fictícia
+    user_root_data["password"] = password  # Adiciona a senha no mock
+    user_root_data["password_hash"] = get_password_hash(password)  # Gera o hash da senha
+    return user_root_data
 
 
 # BEE TYPE

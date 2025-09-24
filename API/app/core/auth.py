@@ -1,13 +1,13 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session, joinedload
-from db.database import SessionLocal, get_db
+from db.database import get_db
 from core.config import settings
-from API.app.models.user_root import User
-from API.app.models.users_associated import Company
+from models.user_root import UserRoot
+from models.users_associated import UserAssociated
 from typing import Type, Union, Optional
 
 secret_key = settings.secret_key
@@ -25,23 +25,23 @@ def get_password_hash(password):
 
 def create_access_token(data: dict, expires_delta: int = access_token_expire_minutes):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=expires_delta)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_delta)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, secret_key, algorithm=algorithm)
 
-def authenticate_entity(entity_type: Type[Union[User, Company]], email: str, password: str, db: Session) -> Optional[Union[User, Company]]:
+def authenticate_entity(entity_type: Type[Union[UserRoot, UserAssociated]], email: str, password: str, db: Session) -> Optional[Union[UserRoot, UserAssociated]]:
     entity = db.query(entity_type).filter(entity_type.email == email).first()
     if not entity or not verify_password(password, entity.password_hash):
         return None
     return entity
 
-def authenticate_user(email: str, password: str, db: Session):
-    return authenticate_entity(User, email, password, db)
+def authenticate_user_root(email: str, password: str, db: Session):
+    return authenticate_entity(UserRoot, email, password, db)
 
-def authenticate_company(email: str, password: str, db: Session):
-    return authenticate_entity(Company, email, password, db)
+def authenticate_user_associated(email: str, password: str, db: Session):
+    return authenticate_entity(UserAssociated, email, password, db)
 
-def get_current_entity(entity_type: Type[Union[User, Company]], token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_entity(entity_type: Type[Union[UserRoot, UserAssociated]], token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         email: str = payload.get("sub")
@@ -52,7 +52,7 @@ def get_current_entity(entity_type: Type[Union[User, Company]], token: str = Dep
         entity = db.query(entity_type).options(joinedload(entity_type.access)).filter(entity_type.email == email).first()
         
         if not entity:
-            entity_name = "Usuário" if entity_type == User else "Empresa"
+            entity_name = "Usuário Raíz" if entity_type == UserRoot else "Usuário Associado"
             raise HTTPException(status_code=404, detail=f"{entity_name} não encontrado")
         
         return entity
@@ -62,23 +62,23 @@ def get_current_entity(entity_type: Type[Union[User, Company]], token: str = Dep
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token inválido")
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    return get_current_user(User, token, db)
+def get_current_user_root(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    return get_current_entity(UserRoot, token, db)
 
-def get_current_company(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    return get_current_company(Company, token, db)
+def get_current_user_associated(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    return get_current_entity(UserAssociated, token, db)
 
 def require_access(*allowed_access):
-    def access_checker(user=Depends(get_current_user), company = Depends(get_current_company)):
-        if user is not None:
-            if user.access.name not in allowed_access:
+    def access_checker(user_root=Depends(get_current_user_root), user_associated = Depends(get_current_user_associated)):
+        if user_root is not None:
+            if user_root.access.name not in allowed_access:
                 raise HTTPException(status_code=403, detail="Acesso negado")
-            return user
+            return user_root
     
-        if company is not None:
-            if company.access.name not in allowed_access:
+        if user_associated is not None:
+            if user_associated.access.name not in allowed_access:
                 raise HTTPException(status_code=403, detail="Acesso negado")
-            return company
+            return user_associated
         
         raise HTTPException(status_code=403, detail="Entidade não identificada")
     

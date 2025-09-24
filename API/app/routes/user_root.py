@@ -1,0 +1,118 @@
+from fastapi import Depends, HTTPException, APIRouter, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from datetime import datetime, timezone
+from db.database import get_db
+from models.user_root import UserRoot
+from schemas.user_root import UserRootCreate, UserRootResponse, UserRootUpdate
+from core.auth import (
+    get_password_hash,
+    create_access_token,
+    authenticate_user_root,
+    get_current_user_root
+)
+
+router = APIRouter(prefix="/users_root", tags=["Users Root"])
+
+@router.post("/register", response_model=UserRootResponse, status_code=status.HTTP_201_CREATED)
+def register_user(user_data: UserRootCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(UserRoot).filter(UserRoot.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email já cadastrado.")
+
+    new_user_root = UserRoot(
+        name=user_data.name,
+        email=user_data.email,
+        password_hash=get_password_hash(user_data.password),
+        access_id=user_data.access_id,
+        status=True,
+        last_login=None
+    )
+
+    db.add(new_user_root)
+    db.commit()
+    db.refresh(new_user_root)
+
+    return new_user_root
+
+@router.post("/login")
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user_root = authenticate_user_root(email=form_data.username, password=form_data.password, db=db)
+    if not user_root:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
+
+    if not user_root.status:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo")
+
+    user_root.last_login = datetime.now(timezone.utc)
+    db.commit()
+
+    token_data = {
+        "sub": user_root.email,
+        "user_id": user_root.id,
+        "access_id": user_root.access_id
+    }
+
+    access_token = create_access_token(data=token_data)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_root": {
+            "id": user_root.id,
+            "name": user_root.name,
+            "email": user_root.email,
+            "status": user_root.status
+        }
+    }
+    
+@router.get("/profile", response_model = UserRootResponse)
+def profile_user(current_user: UserRoot = Depends(get_current_user_root)):
+    return current_user
+
+@router.get("/{user_root_id}", response_model=UserRootResponse)
+def get_user_root(user_root_id: int, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+    if not user_root:
+        raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
+    return user_root
+
+@router.put("/{user_root_id}", response_model=UserRootResponse)
+def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+    if not user_root:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    if user_root_update.name:
+        user_root.name = user_root_update.name
+
+    if user_root_update.email and user_root_update.email != user_root.email:
+        if db.query(UserRoot).filter(UserRoot.email == user_root_update.email).first():
+            raise HTTPException(status_code=400, detail="Email já cadastrado.")
+        user_root.email = user_root_update.email
+
+    if user_root_update.password:
+        user_root.password_hash = get_password_hash(user_root_update.password)
+
+    if user_root_update.status is not None:
+        user_root.status = user_root_update.status
+
+    if user_root_update.access_id:
+        user_root.access_id = user_root_update.access_id
+
+    db.commit()
+    db.refresh(user_root)
+
+    return user_root
+
+# Adicionar a exclusão dos itens associados a esse usuário raiz
+@router.delete("/{user_root_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_root(user_root_id: int, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+    if not user_root:
+        raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
+
+    db.delete(user_root)
+    db.commit()
+
+    return {"message": "Usuário Raiz e seus dependentes deletados com sucesso!"}

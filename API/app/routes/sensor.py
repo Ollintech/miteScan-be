@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
-from API.app.models.sensor_readings import Sensor
+from models.sensor_readings import Sensor
 from schemas.sensor import SensorRead, SensorResponse
 
 router = APIRouter(prefix='/sensors', tags=['Sensors'])
@@ -30,9 +30,9 @@ def receive_data(sensor_data: SensorRead, db: Session = Depends(get_db)):
 
         db.commit()
         db.refresh(hive)
-        
+
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Erro ao salvar os dados no banco")
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar os dados no banco: {str(e)}")
 
     return new_sensor_reading

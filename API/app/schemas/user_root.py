@@ -1,12 +1,11 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 
-class UserCreate(BaseModel):
+class UserRootCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
     access_id: int
-    company_id: int
 
     @field_validator('password')
     @classmethod
@@ -15,21 +14,19 @@ class UserCreate(BaseModel):
             raise ValueError('A senha deve ter pelo menos 8 caracteres')
         return v
 
-class UserResponse(BaseModel):
+class UserRootResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
     status: bool
     access_id: int
-    company_id: int
 
     class Config:
         from_attributes = True
 
-class UserUpdate(BaseModel):
+class UserRootUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     status: Optional[bool] = False
     access_id: Optional[int] = None
-    company_id: Optional[int] = None

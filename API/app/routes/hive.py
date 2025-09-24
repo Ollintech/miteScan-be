@@ -1,8 +1,8 @@
-from fastapi import Depends, APIRouter, HTTPException, status, Query
+from fastapi import Depends, APIRouter, HTTPException, status
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
-from API.app.models.sensor_readings import Sensor
+from models.sensor_readings import Sensor
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 from core.auth import require_access
 

@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from db.database import get_db
 from models.user_root import UserRoot
 from schemas.user_root import UserRootCreate, UserRootResponse, UserRootUpdate
+from models.users_associated import UserAssociated
+from schemas.user_associated import UserAssociatedResponse
 from core.auth import (
     get_password_hash,
     create_access_token,
@@ -76,6 +78,15 @@ def get_user_root(user_root_id: int, db: Session = Depends(get_db)):
     if not user_root:
         raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
     return user_root
+
+@router.get('/{user_root_id}', response_model = UserAssociatedResponse)
+def get_all_users_associated(user_root_id: int, db: Session = Depends(get_db)):
+    users_associated = db.query(UserAssociated).filter(UserRoot.id == user_root_id).all()
+
+    if not users_associated:
+        raise HTTPException(status_code = 404, detail = 'Usuários Associados não encontrados.')
+    
+    return users_associated
 
 @router.put("/{user_root_id}", response_model=UserRootResponse)
 def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Session = Depends(get_db)):

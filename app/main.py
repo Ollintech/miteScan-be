@@ -21,7 +21,6 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 Base.metadata.create_all(bind=engine)
-app.add_middleware(ActiveUserMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,6 +29,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+app.add_middleware(ActiveUserMiddleware)
 
 app.include_router(user_associated.router)
 app.include_router(user_root.router)

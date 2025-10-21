@@ -3,12 +3,13 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from db.database import get_db
 from models.users_associated import UserAssociated
+from models.user_root import UserRoot
 from schemas.user_associated import UserAssociatedCreate, UserAssociatedResponse, UserAssociatedUpdate
 from core.auth import (get_password_hash, authenticate_user_associated, create_access_token, get_current_user_associated)
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timezone
 
-router = APIRouter(prefix = '/UsersAssociated', tags = ['Users Associated'])
+router = APIRouter(prefix = '/{user_root_id}/users_associated', tags = ['Users Associated'])
 pwd_context = CryptContext(schemes = ['bcrypt'], deprecated = ['auto'])
 
 @router.post('/register', response_model = UserAssociatedResponse, status_code = status.HTTP_201_CREATED)

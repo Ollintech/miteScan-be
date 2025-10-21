@@ -64,7 +64,8 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
             "id": user_root.id,
             "name": user_root.name,
             "email": user_root.email,
-            "status": user_root.status
+            "status": user_root.status,
+            "access_id": user_root.access_id
         }
     }
     

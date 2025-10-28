@@ -61,6 +61,9 @@ def login_user_associated(form_data: OAuth2PasswordRequestForm = Depends(), db: 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
 
+    if not user_associated.status:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo")
+
     user_associated.last_login = datetime.now(timezone.utc)
     db.commit()
 

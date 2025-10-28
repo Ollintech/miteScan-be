@@ -13,7 +13,7 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_analysis.hive_id,
-        user_id = hive_analysis.user_id,
+        user_root_id = hive_analysis.user_root_id,
         image_path = hive_analysis.image_path,
         varroa_detected = hive_analysis.varroa_detected,
         detection_confidence = hive_analysis.detection_confidence
@@ -27,7 +27,7 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
 @router.get('/all', response_model = list[HiveAnalysisResponse])
 def get_all_hive_analyses(db: Session = Depends(get_db), user = Depends(require_access("owner", "manager", "employee"))):
-    hive_analysis = db.query(HiveAnalysis).join(Hive).filter(HiveAnalysis.user_id == user.id).all()
+    hive_analysis = db.query(HiveAnalysis).join(Hive).filter(HiveAnalysis.user_root_id == user.id).all()
 
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Não há registros de analises de colmeias.')

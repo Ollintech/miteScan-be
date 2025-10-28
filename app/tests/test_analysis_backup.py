@@ -17,7 +17,7 @@
 
 #     hive_analysis = HiveAnalysis(
 #         hive_id=1,
-#         user_id=user.id,
+#         user_root_id=user.id,
 #         image_path="images/hive1_analysis.jpg",
 #         varroa_detected=True,
 #         detection_confidence=0.95
@@ -28,7 +28,7 @@
 
 #     backup = AnalysisBackup(
 #         analysis_id=hive_analysis.id,
-#         user_id=user.id,
+#         user_root_id=user.id,
 #         file_path="backups/analysis_backup_1.zip"
 #     )
 #     db.add(backup)
@@ -43,7 +43,7 @@
 
 #     response = client.post("/analysis_backup/create", json={
 #         "analysis_id": hive_analysis.id,
-#         "user_id": user.id,
+#         "user_root_id": user.id,
 #         "file_path": "backups/analysis_backup_2.zip",
 #         "created_at": "2025-04-24T10:00:00Z"
 #     })

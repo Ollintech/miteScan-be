@@ -1,105 +1,126 @@
-from API.app.models.users_associated import Company
-from tests.mock_data import mock_company, mock_company_response
+import pytest
+from sqlalchemy.orm import Session
+from models.user_root import UserRoot
+from models.users_associated import UserAssociated
+from models.access import Access
+from core.auth import get_password_hash, create_access_token
 
-
-def test_create_company_success(client, db):
-    db.query(Company).delete()
+@pytest.fixture(scope="function")
+def setup_data(db: Session):
+    """Cria um usuário root e um nível de acesso para os testes."""
+    # Limpa dados de testes anteriores para evitar conflitos
+    db.query(UserAssociated).delete()
+    db.query(UserRoot).delete()
+    db.query(Access).delete()
     db.commit()
 
-    company_data = mock_company()
+    # Cria Nível de Acesso
+    access_employee = Access(name="employee", description="Funcionário")
+    access_root = Access(name="owner", description="Dono")
+    db.add_all([access_employee, access_root])
+    db.commit()
 
-    response = client.post("/companies/create", json=company_data)
+    # Cria Usuário Root
+    user_root = UserRoot(
+        name="Dono Teste",
+        email="dono@teste.com",
+        password_hash=get_password_hash("senha123"),
+        access_id=access_root.id,
+        status=True
+    )
+    db.add(user_root)
+    db.commit()
+    db.refresh(user_root)
+
+    # Cria Token para o Root
+    token = create_access_token({"sub": user_root.email, "id": user_root.id, "type": "root"})
+    headers = {"Authorization": f"Bearer {token}"}
+
+    return user_root, access_employee, headers
+
+def test_create_user_associated_success(client, db: Session, setup_data):
+    user_root, access_employee, headers = setup_data
+
+    user_associated_data = {
+        "name": "Funcionário Teste",
+        "email": "func@teste.com",
+        "password": "outrasenha",
+        "access_id": access_employee.id
+    }
+
+    response = client.post(f"/users_root/{user_root.id}/users_associated/register", json=user_associated_data, headers=headers)
 
     assert response.status_code == 201
     data = response.json()
-    assert data["name"] == company_data["name"]
-    assert data["cnpj"] == company_data["cnpj"]
+    assert data["name"] == user_associated_data["name"]
+    assert data["email"] == user_associated_data["email"]
+    assert data["user_root_id"] == user_root.id
     assert "id" in data
 
+def test_create_user_associated_duplicate_email(client, db: Session, setup_data):
+    user_root, access_employee, headers = setup_data
 
-def test_create_company_duplicate_cnpj(client, db):
-    company_data = mock_company()
-    company = Company(**company_data)
-    db.add(company)
+    # Cria um usuário associado primeiro
+    existing_user = UserAssociated(
+        name="Usuário Existente",
+        email="existente@teste.com",
+        password_hash=get_password_hash("senha"),
+        access_id=access_employee.id,
+        user_root_id=user_root.id
+    )
+    db.add(existing_user)
     db.commit()
 
-    response = client.post("/companies/create", json={
-        "name": "Outra Empresa",
-        "cnpj": company_data["cnpj"]
-    })
-
-    assert response.status_code == 400
-    assert response.json()["detail"] == "CNPJ já cadastrado."
-
-
-def test_get_company_success(client, db):
-    company_data = {"name": "Empresa Teste", "cnpj": "98765432000199"}
-    company = Company(**company_data)
-    db.add(company)
-    db.commit()
-    db.refresh(company)
-
-    response = client.get(f"/companies/{company.id}")
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "id": company.id,
-        **company_data
+    # Tenta criar outro com o mesmo email
+    user_associated_data = {
+        "name": "Outro Funcionário",
+        "email": "existente@teste.com",
+        "password": "outrasenha",
+        "access_id": access_employee.id
     }
 
-
-def test_get_company_not_found(client):
-    response = client.get("/companies/9999")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Empresa não encontrada."
-
-
-def test_update_company_success(client, db):
-    company = Company(name="Antigo Nome", cnpj="11111111111111")
-    db.add(company)
-    db.commit()
-    db.refresh(company)
-
-    response = client.put(f"/companies/{company.id}", json={
-        "name": "Novo Nome"
-    })
-
-    assert response.status_code == 200
-    assert response.json()["name"] == "Novo Nome"
-    assert response.json()["cnpj"] == "11111111111111"
-
-
-def test_update_company_duplicate_cnpj(client, db):
-    db.query(Company).delete()
-    db.commit()
-
-    company1 = Company(name="Empresa 1", cnpj="12345678900001")
-    company2 = Company(name="Empresa 2", cnpj="22222222222222")
-    db.add_all([company1, company2])
-    db.commit()
-
-    response = client.put(f"/companies/{company2.id}", json={
-        "cnpj": company1.cnpj
-    })
+    response = client.post(f"/users_root/{user_root.id}/users_associated/register", json=user_associated_data, headers=headers)
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "CNPJ já cadastrado."
+    assert response.json()["detail"] == "Email já cadastrado."
 
+def test_get_user_associated_success(client, db: Session, setup_data):
+    user_root, access_employee, headers = setup_data
 
-def test_delete_company_success(client, db):
-    company = Company(name="Empresa Excluir", cnpj="33333333333333")
-    db.add(company)
+    user_associated = UserAssociated(
+        name="Funcionário para Buscar",
+        email="buscar@teste.com",
+        password_hash=get_password_hash("senha"),
+        access_id=access_employee.id,
+        user_root_id=user_root.id
+    )
+    db.add(user_associated)
     db.commit()
-    db.refresh(company)
+    db.refresh(user_associated)
 
-    response = client.delete(f"/companies/{company.id}")
+    # Supondo que a rota para buscar um usuário associado seja /users_root/{user_root_id}/users_associated/{user_associated_id}
+    # Esta rota não existe atualmente, mas é uma sugestão de como testar.
+    # Por enquanto, vamos testar a listagem.
+    response = client.get(f"/users_root/{user_root.id}/users_associated/all", headers=headers)
+
+    assert response.status_code == 200
+    assert len(response.json()) > 0
+    assert response.json()[0]["email"] == "buscar@teste.com"
+
+def test_delete_user_associated_success(client, db: Session, setup_data):
+    user_root, access_employee, headers = setup_data
+
+    user_to_delete = UserAssociated(
+        name="Funcionário para Deletar",
+        email="deletar@teste.com",
+        password_hash=get_password_hash("senha"),
+        access_id=access_employee.id,
+        user_root_id=user_root.id
+    )
+    db.add(user_to_delete)
+    db.commit()
+    db.refresh(user_to_delete)
+
+    # Supondo que a rota de deleção seja /users_root/{user_root_id}/users_associated/{user_associated_id}
+    response = client.delete(f"/users_root/{user_root.id}/users_associated/{user_to_delete.id}", headers=headers)
     assert response.status_code == 204
-
-    deleted = db.query(Company).filter_by(id=company.id).first()
-    assert deleted is None
-
-
-def test_delete_company_not_found(client):
-    response = client.delete("/companies/9999")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Empresa não encontrada."

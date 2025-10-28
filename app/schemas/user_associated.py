@@ -6,7 +6,7 @@ class UserAssociatedCreate(BaseModel):
     email: EmailStr
     password: str
     access_id: int
-    user_id: int
+    user_root_id: int
     
     @field_validator('password')
     @classmethod
@@ -20,7 +20,7 @@ class UserAssociatedResponse(BaseModel):
     name: str
     email: EmailStr
     access_id: int
-    user_id: int
+    user_root_id: int
 
     class Config:
         from_attributes = True
@@ -30,4 +30,4 @@ class UserAssociatedUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     access_id: Optional[int] = None
-    user_id: Optional[int] = None
+    user_root_id: Optional[int] = None

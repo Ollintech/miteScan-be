@@ -48,7 +48,7 @@ def register_user_associated(
         email = user_associated_data.email,
         password_hash=get_password_hash(user_associated_data.password),
         access_id=user_associated_data.access_id,
-        user_id = user_root_id,
+        user_root_id = user_root_id,
         last_login=None
     )
 
@@ -57,36 +57,6 @@ def register_user_associated(
     db.refresh(new_user_associated)
 
     return new_user_associated
-
-
-@router.post('/login')
-def login_user_associated(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user_associated = authenticate_user_associated(
-        email=form_data.username, password=form_data.password, db=db)
-    if not user_associated:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
-
-    user_associated.last_login = datetime.now(timezone.utc)
-    db.commit()
-
-    token_data = {
-        "sub": user_associated.email,
-        "user_associated_id": user_associated.id,
-        "access_id": user_associated.access_id
-    }
-
-    access_token = create_access_token(data=token_data)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_associated": {
-            "id": user_associated.id,
-            "name": user_associated.name,
-            "email": user_associated.email
-        }
-    }
 
 
 @router.get('/profile', response_model=UserAssociatedResponse)
@@ -108,7 +78,7 @@ def list_users_associated(
     """
     check_root_permission(user_root_id, current_user_root)
     
-    users = db.query(UserAssociated).filter(UserAssociated.user_id == user_root_id).all()
+    users = db.query(UserAssociated).filter(UserAssociated.user_root_id == user_root_id).all()
     return users
 
 
@@ -126,7 +96,7 @@ def get_user_associated(
 
     user_associated = db.query(UserAssociated).filter(
         UserAssociated.id == user_associated_id,
-        UserAssociated.user_id == user_root_id
+        UserAssociated.user_root_id == user_root_id
     ).first()
 
     if not user_associated:
@@ -178,7 +148,7 @@ def update_user_associated(
 
     user_associated = db.query(UserAssociated).filter(
         UserAssociated.id == user_associated_id,
-        UserAssociated.user_id == user_root_id
+        UserAssociated.user_root_id == user_root_id
     ).first()
 
     if not user_associated:
@@ -218,7 +188,7 @@ def delete_user_associated(
     
     user_associated = db.query(UserAssociated).filter(
         UserAssociated.id == user_associated_id,
-        UserAssociated.user_id == user_root_id
+        UserAssociated.user_root_id == user_root_id
     ).first()
     
     if not user_associated:

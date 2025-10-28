@@ -12,7 +12,7 @@ def create_analysis_backup(analysis_backup: AnalysisBackupCreate, db: Session = 
     
     new_analysis_backup = AnalysisBackup(
         analysis_id = analysis_backup.analysis_id,
-        user_id = analysis_backup.user_id,
+        user_root_id = analysis_backup.user_root_id,
         file_path = analysis_backup.file_path,
         created_at = datetime.utcnow
     )

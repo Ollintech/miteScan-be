@@ -5,6 +5,9 @@ from datetime import datetime, timezone
 from db.database import get_db
 from models.user_root import UserRoot
 from schemas.user_root import UserRootCreate, UserRootResponse, UserRootUpdate
+from models.hive import Hive
+from models.hive_analysis import HiveAnalysis
+from models.sensor_readings import Sensor
 from models.users_associated import UserAssociated
 from schemas.user_associated import UserAssociatedResponse
 from core.auth import (
@@ -37,37 +40,6 @@ def register_user(user_data: UserRootCreate, db: Session = Depends(get_db)):
 
     return new_user_root
 
-@router.post("/login")
-def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user_root = authenticate_user_root(email=form_data.username, password=form_data.password, db=db)
-    if not user_root:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
-
-    if not user_root.status:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo")
-
-    user_root.last_login = datetime.now(timezone.utc)
-    db.commit()
-
-    token_data = {
-        "sub": user_root.email,
-        "user_id": user_root.id,
-        "access_id": user_root.access_id
-    }
-
-    access_token = create_access_token(data=token_data)
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_root": {
-            "id": user_root.id,
-            "name": user_root.name,
-            "email": user_root.email,
-            "status": user_root.status,
-            "access_id": user_root.access_id
-        }
-    }
     
 @router.get("/profile", response_model = UserRootResponse)
 def profile_user(current_user: UserRoot = Depends(get_current_user_root)):
@@ -124,7 +96,20 @@ def delete_user_root(user_root_id: int, db: Session = Depends(get_db)):
     if not user_root:
         raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
 
-    db.delete(user_root)
-    db.commit()
+    try:
+        # Excluir dados dependentes em ordem
+        hives = db.query(Hive).filter(Hive.user_root_id == user_root_id).all()
+        for hive in hives:
+            db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive.id).delete(synchronize_session=False)
+            db.query(Sensor).filter(Sensor.hive_id == hive.id).delete(synchronize_session=False)
+            db.delete(hive)
 
-    return {"message": "Usuário Raiz e seus dependentes deletados com sucesso!"}
+        db.query(UserAssociated).filter(UserAssociated.user_root_id == user_root_id).delete(synchronize_session=False)
+        
+        db.delete(user_root)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao deletar usuário e seus dados: {e}")
+
+    return None

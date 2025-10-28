@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 import uvicorn, os
-from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor
+from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor, auth_routes
 from db.database import Base, engine, get_db
 from core.middleware import ActiveUserMiddleware
 from seed import seed_data
@@ -40,6 +40,7 @@ app.include_router(bee_type.router)
 app.include_router(analysis_backup.router)
 app.include_router(hive_analysis.router)
 app.include_router(sensor.router)
+app.include_router(auth_routes.router)
 
 @app.post("/sensor")
 async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
@@ -56,17 +57,13 @@ async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
     return {"status": "ok"}
 
 if __name__ == "__main__":
-    # Add multiprocessing guard
     import multiprocessing
-    # Add multiprocessing guard to prevent spawn method errors on Windows
     import sys
     if sys.platform.startswith("win"):
         import multiprocessing
         try:
-            # force=True ensures the start method is set even if previously set in some cases
             multiprocessing.set_start_method("spawn", force=True)
         except RuntimeError:
-            pass  # Method already set
-
-    # Disable reload on Windows to avoid multiprocessing issues
+            pass
+        
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

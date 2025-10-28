@@ -1,49 +1,62 @@
 import asyncio
 import json
 import requests
-import paho.mqtt.client as mqtt
+import logging
 import os, multiprocessing
-from dotenv import load_dotenv
+import paho.mqtt.client as mqtt
+from core.config import settings
 
-load_dotenv()
+MQTT_BROKER = settings.mqtt_broker
+MQTT_PORT = settings.mqtt_port
+MQTT_TOPIC = settings.mqtt_topic
+API_URL = settings.api_sensor_url
 
-MQTT_BROKER = os.getenv("MQTT_BROKER")
-MQTT_PORT = int(os.getenv("MQTT_PORT"))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC")
-API_URL = os.getenv("API_SENSOR_URL")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-def on_connect(client, userdata, flags, rc):
-    print("✅ Conectado ao MQTT com código:", rc)
-    client.subscribe(MQTT_TOPIC)
+def on_connect(client, userdata, flags, rc, properties=None):
+    """Callback para quando o cliente se conecta ao broker."""
+    if rc == 0:
+        logger.info("✅ Conectado ao broker MQTT com sucesso.")
+        client.subscribe(MQTT_TOPIC)
+        logger.info(f"   -> Inscrito no tópico: {MQTT_TOPIC}")
+    else:
+        logger.error(f"❌ Falha ao conectar ao broker MQTT. Código: {rc}")
 
 def on_message(client, userdata, msg):
+    """Callback para quando uma mensagem é recebida."""
+    logger.info(f"📩 Mensagem recebida no tópico: {msg.topic}")
     try:
         data = json.loads(msg.payload.decode())
+        
+        if 'id' not in data:
+            logger.warning(f"   -> Payload sem 'id' do dispositivo, ignorando. Payload: {data}")
+            return
+        data['colmeia_id'] = data.pop('id') 
+
+        logger.info(f"   -> Payload: {data}")
         response = requests.post(API_URL, json=data)
-        print("📤 Enviado para API. Código:", response.status_code)
+        response.raise_for_status() 
+        logger.info(f"   -> ✅ Dados enviados para API com sucesso. Status: {response.status_code}")
+    except json.JSONDecodeError:
+        logger.error(f"   -> ❌ Erro ao decodificar JSON. Payload recebido: {msg.payload.decode()}", exc_info=True)
     except Exception as e:
-        print("❌ Erro ao enviar para API:", e)
+        logger.error(f"   -> ❌ Erro ao processar mensagem ou enviar para API: {e}", exc_info=True)
 
 def start_mqtt():
-    client = mqtt.Client()
+    """Inicializa e executa o loop do cliente MQTT."""
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
     client.on_connect = on_connect
     client.on_message = on_message
 
     try:
-        print(f"🔌 Conectando ao broker {MQTT_BROKER}:{MQTT_PORT}...")
+        logger.info(f"🔌 Conectando ao broker MQTT em {MQTT_BROKER}:{MQTT_PORT}...")
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.loop_forever()  # Use loop_forever instead of loop_start for better control
+        client.loop_forever() 
     except Exception as e:
-        print(f"❌ Falha ao conectar ao broker MQTT: {e}")
+        logger.critical(f"CRÍTICO: Não foi possível conectar ao broker MQTT. Verifique o endereço e a rede. Erro: {e}", exc_info=True)
 
 async def run_mqtt_in_background():
-    # Run MQTT in a separate thread to avoid blocking
-    import threading
-    mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
-    mqtt_thread.start()
-    await asyncio.sleep(0)  # Yield control to allow other tasks to run
-    # Run in a separate process to avoid conflicts
     process = multiprocessing.Process(target=start_mqtt)
     process.start()
-    await asyncio.sleep(0) 
-
+    await asyncio.sleep(1)

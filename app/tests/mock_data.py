@@ -47,13 +47,13 @@ def mock_user_root_with_hash():
     
 
 # USER ASSOCIATED
-def mock_user_associated(access_id=1, user_id=1):
+def mock_user_associated(access_id=1, user_root_id=1):
     return {
         "name": "Mock User Associated",
         "email": "mockuser@example.com",
         "password": "securePass123",
         "access_id": access_id,
-        "user_id": user_id
+        "user_root_id": user_root_id
     }
 
 
@@ -64,7 +64,7 @@ def mock_user_associated_response():
         "email": "mockuser@example.com",
         "password": "securePass123",
         "access_id": 1,
-        "user_id": 1
+        "user_root_id": 1
     }
     
     
@@ -77,11 +77,11 @@ def mock_user_associated_with_hash():
 
 
 # BEE TYPE
-def mock_bee_type(user_id=1):
+def mock_bee_type(user_root_id=1):
     return {
         "name": "Apis Mellifera",
         "description": "European honey bee",
-        "user_id": user_id
+        "user_root_id": user_root_id
     }
 
 
@@ -90,14 +90,14 @@ def mock_bee_type_response():
         "id": 1,
         "name": "Apis Mellifera",
         "description": "European honey bee",
-        "user_id": 1
+        "user_root_id": 1
     }
 
 
 # HIVE
-def mock_hive(user_id=1, bee_type_id=1):
+def mock_hive(user_root_id=1, bee_type_id=1):
     return {
-        "user_id": user_id,
+        "user_root_id": user_root_id,
         "bee_type_id": bee_type_id,
         "location_lat": -23.55052,
         "location_lng": -46.633308,
@@ -110,7 +110,7 @@ def mock_hive(user_id=1, bee_type_id=1):
 def mock_hive_response():
     return {
         "id": 1,
-        "user_id": 1,
+        "user_root_id": 1,
         "bee_type_id": 1,
         "location_lat": -23.55052,
         "location_lng": -46.633308,
@@ -121,10 +121,10 @@ def mock_hive_response():
 
 
 # HIVE ANALYSIS
-def mock_hive_analysis(hive_id=1, user_id=1):
+def mock_hive_analysis(hive_id=1, user_root_id=1):
     return {
         "hive_id": hive_id,
-        "user_id": user_id,
+        "user_root_id": user_root_id,
         "image_path": "/images/hive_1.jpg",
         "varroa_detected": True,
         "detection_confidence": 0.92
@@ -135,7 +135,7 @@ def mock_hive_analysis_response():
     return {
         "id": 1,
         "hive_id": 1,
-        "user_id": 1,
+        "user_root_id": 1,
         "image_path": "/images/hive_1.jpg",
         "varroa_detected": True,
         "detection_confidence": 0.92,
@@ -144,10 +144,10 @@ def mock_hive_analysis_response():
 
 
 # ANALYSIS BACKUP
-def mock_analysis_backup(analysis_id=1, user_id=1):
+def mock_analysis_backup(analysis_id=1, user_root_id=1):
     return {
         "analysis_id": analysis_id,
-        "user_id": user_id,
+        "user_root_id": user_root_id,
         "file_path": "/backups/analysis_1.json",
         "created_at": datetime(2024, 1, 1, 12, 5, 0)
     }
@@ -157,7 +157,7 @@ def mock_analysis_backup_response():
     return {
         "id": 1,
         "analysis_id": 1,
-        "user_id": 1,
+        "user_root_id": 1,
         "file_path": "/backups/analysis_1.json"
     }
 

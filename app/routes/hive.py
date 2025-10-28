@@ -25,7 +25,7 @@ def get_viewer_access(
     if current_user_root and current_user_root.id == user_root_id:
         return current_user_root 
 
-    if current_user_associated and current_user_associated.user_id == user_root_id:
+    if current_user_associated and current_user_associated.user_root_id == user_root_id:
         return current_user_associated 
 
     if not current_user_root and not current_user_associated:
@@ -58,7 +58,7 @@ def create_hive(
         raise HTTPException(status_code=400, detail='Uma colmeia já foi cadastrada nessa localização.')
 
     new_hive = Hive(
-        user_id = user_root_id, 
+        user_root_id = user_root_id, 
         bee_type_id=hive.bee_type_id,
         location_lat=hive.location_lat,
         location_lng=hive.location_lng,
@@ -80,7 +80,7 @@ def get_all_hives(
     db: Session = Depends(get_db), 
     user_principal = Depends(get_viewer_access)
 ):
-    hives = db.query(Hive).filter(Hive.user_id == user_root_id).all()
+    hives = db.query(Hive).filter(Hive.user_root_id == user_root_id).all()
 
     if not hives:
         raise HTTPException(status_code=404, detail='Não existem colmeias cadastradas para este usuário.')
@@ -97,7 +97,7 @@ def get_hive(
 ):
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_id == user_root_id
+        Hive.user_root_id == user_root_id
     ).first()
 
     if not hive:
@@ -118,7 +118,7 @@ def update_hive(
 
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_id == user_root_id
+        Hive.user_root_id == user_root_id
     ).first()
 
     if not hive:
@@ -155,7 +155,7 @@ def delete_hive(
 
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_id == user_root_id
+        Hive.user_root_id == user_root_id
     ).first()
 
     if not hive:

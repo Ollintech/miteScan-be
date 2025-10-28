@@ -44,7 +44,7 @@
 #     bee_type = BeeType(
 #         name="European Bee",
 #         description="Apis mellifera",
-#         user_id=user.id 
+#         user_root_id=user.id 
 #     )
 #     db.add(bee_type)
 #     db.commit()
@@ -52,7 +52,7 @@
 
 #     hive = Hive(
 #         bee_type_id=bee_type.id,
-#         user_id=user.id,
+#         user_root_id=user.id,
 #         location_lat=-23.5505,  # Exemplo: latitude de São Paulo
 #         location_lng=-46.6333,  # Exemplo: longitude de São Paulo
 #         size=10,
@@ -65,7 +65,7 @@
 
 #     analysis = HiveAnalysis(
 #         hive_id=hive.id,
-#         user_id=user.id,
+#         user_root_id=user.id,
 #         image_path="images/test.jpg",
 #         varroa_detected=False,
 #         detection_confidence=0.85,
@@ -84,7 +84,7 @@
 
 #     response = client.post("/hive_analyses/create", json={
 #         "hive_id": hive.id,
-#         "user_id": user.id,
+#         "user_root_id": user.id,
 #         "image_path": "images/hive2_analysis.jpg",
 #         "varroa_detected": True,
 #         "detection_confidence": 0.99
@@ -100,7 +100,7 @@
 #     assert response.status_code == 200
 #     data = response.json()
 #     assert data["hive_id"] == hive.id
-#     assert data["user_id"] == user.id
+#     assert data["user_root_id"] == user.id
 
 # def test_get_hive_analysis_not_found(client, auth_headers):
 #     response = client.get("/hive_analyses/9999", headers=auth_headers)

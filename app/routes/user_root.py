@@ -8,7 +8,7 @@ from schemas.user_root import UserRootCreate, UserRootResponse, UserRootUpdate
 from models.hive import Hive
 from models.hive_analysis import HiveAnalysis
 from models.sensor_readings import Sensor
-from models.users_associated import UserAssociated
+from models.user_associated import UserAssociated
 from schemas.user_associated import UserAssociatedResponse
 from core.auth import (
     get_password_hash,
@@ -89,7 +89,6 @@ def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Se
 
     return user_root
 
-# Adicionar a exclusão dos itens associados a esse usuário raiz
 @router.delete("/{user_root_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_root(user_root_id: int, db: Session = Depends(get_db)):
     user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
@@ -97,7 +96,6 @@ def delete_user_root(user_root_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
 
     try:
-        # Excluir dados dependentes em ordem
         hives = db.query(Hive).filter(Hive.user_root_id == user_root_id).all()
         for hive in hives:
             db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive.id).delete(synchronize_session=False)

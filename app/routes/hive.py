@@ -4,7 +4,7 @@ from db.database import get_db
 from models.hive import Hive
 from models.sensor_readings import Sensor
 from models.user_root import UserRoot
-from models.users_associated import UserAssociated
+from models.user_associated import UserAssociated
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
 from typing import List, Optional
 from core.auth import (

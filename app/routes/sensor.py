@@ -9,10 +9,10 @@ router = APIRouter(prefix='/sensors', tags=['Sensors'])
 
 @router.post("/", response_model=SensorResponse)
 def receive_data(sensor_data: SensorRead, db: Session = Depends(get_db)):
-    hive = db.query(Hive).order_by(Hive.id.desc()).first()
+    hive = db.query(Hive).filter(Hive.id == sensor_data.hive_id).first() 
 
     if not hive: 
-        raise HTTPException(status_code=404, detail="Colmeia não encontrada")
+        raise HTTPException(status_code=404, detail=f"Colmeia com ID '{sensor_data.hive_id}' não encontrada")
     
     new_sensor_reading = Sensor(
         hive_id=hive.id,

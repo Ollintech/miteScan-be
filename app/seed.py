@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
 from models import user_root as UserRootModel
-from models import users_associated as UserAssociatedModel
+from models import user_associated as UserAssociatedModel
 from models import access as AccessModel
 from models import bee_type as BeeTypeModel
 from models import hive as HiveModel
@@ -121,10 +121,10 @@ def seed_data():
 
         # --- 5. Colmeias ---
         hives_data = [
-            {"user_root_id": ana_id, "bee_type_id": jatai_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": "Média"},
-            {"user_root_id": isabely_id, "bee_type_id": mandacaia_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": "Grande"},
-            {"user_root_id": gustavo_id, "bee_type_id": urucu_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": "Pequena"},
-            {"user_root_id": yasmin_id, "bee_type_id": irapuca_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": "Média"},
+            {"user_root_id": ana_id, "bee_type_id": jatai_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": 2}, # Média
+            {"user_root_id": isabely_id, "bee_type_id": mandacaia_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": 3}, # Grande
+            {"user_root_id": gustavo_id, "bee_type_id": urucu_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": 1}, # Pequena
+            {"user_root_id": yasmin_id, "bee_type_id": irapuca_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": 2}, # Média
         ]
         
         for hive in hives_data:
@@ -152,28 +152,20 @@ def seed_data():
         
         # --- 6. Leituras de Sensores ---
         sensors_data = [
-            {"hive_id": hive1_id, "humidity": 65.0, "temperature": 30.5, "created_at": datetime.utcnow()},
-            {"hive_id": hive2_id, "humidity": 66.0, "temperature": 31.5, "created_at": datetime.utcnow()},
-            {"hive_id": hive3_id, "humidity": 67.0, "temperature": 32.5, "created_at": datetime.utcnow()},
-            {"hive_id": hive4_id, "humidity": 68.0, "temperature": 33.5, "created_at": datetime.utcnow()},
+            {"hive_id": hive1_id, "humidity": 65.0, "temperature": 30.5},
+            {"hive_id": hive2_id, "humidity": 66.0, "temperature": 31.5},
+            {"hive_id": hive3_id, "humidity": 67.0, "temperature": 32.5},
+            {"hive_id": hive4_id, "humidity": 68.0, "temperature": 33.5},
         ]
         
         for sensor in sensors_data:
-            existing_sensor = db.query(SensorModel.Sensor).filter(
-                SensorModel.Sensor.hive_id == sensor["hive_id"],
-                SensorModel.Sensor.created_at == sensor["created_at"]
-            ).first()
-            
-            if not existing_sensor:
-                new_sensor = SensorModel.Sensor(
-                    hive_id=sensor["hive_id"],
-                    humidity=sensor["humidity"],
-                    temperature=sensor["temperature"]
-                )
-                db.add(new_sensor)
-                print(f"Leitura do sensor da colmeia {sensor['hive_id']} criada com sucesso.")
-            else:
-                print(f"Leitura do sensor da colmeia {sensor['hive_id']} já existe.")
+            new_sensor = SensorModel.Sensor(
+                hive_id=sensor["hive_id"],
+                humidity=sensor["humidity"],
+                temperature=sensor["temperature"]
+            )
+            db.add(new_sensor)
+            print(f"Leitura do sensor da colmeia {sensor['hive_id']} criada com sucesso.")
         db.commit()
 
         # --- 7. Análises de Colmeia ---
@@ -216,8 +208,8 @@ def seed_data():
 
         # --- 8. Backups de Análises ---
         backups_data = [
-            {"analysis_id": analysis1.id, "user_root_id": ana_id, "file_path": "backup/image1.jpg", "created_at": datetime.utcnow()} if analysis1 else None,
-            {"analysis_id": analysis3.id, "user_root_id": gustavo_id, "file_path": "backup/image3.jpg", "created_at": datetime.utcnow()} if analysis3 else None,
+            {"analysis_id": analysis1.id, "user_root_id": ana_id, "file_path": "backup/image1.jpg"} if analysis1 else None,
+            {"analysis_id": analysis3.id, "user_root_id": gustavo_id, "file_path": "backup/image3.jpg"} if analysis3 else None,
         ]
 
         for backup in backups_data:
@@ -229,8 +221,7 @@ def seed_data():
                 new_backup = AnalysisBackupModel.AnalysisBackup(
                     analysis_id=backup["analysis_id"],
                     user_root_id=backup["user_root_id"],
-                    file_path=backup["file_path"],
-                    created_at=backup["created_at"]
+                    file_path=backup["file_path"]
                 )
                 db.add(new_backup)
                 print(f"Backup da análise '{backup['analysis_id']}' criado com sucesso.")

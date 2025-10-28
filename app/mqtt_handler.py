@@ -32,7 +32,7 @@ def on_message(client, userdata, msg):
         if 'id' not in data:
             logger.warning(f"   -> Payload sem 'id' do dispositivo, ignorando. Payload: {data}")
             return
-        data['colmeia_id'] = data.pop('id') 
+        data['hive_id'] = data.pop('id')
 
         logger.info(f"   -> Payload: {data}")
         response = requests.post(API_URL, json=data)
@@ -53,6 +53,9 @@ def start_mqtt():
         logger.info(f"🔌 Conectando ao broker MQTT em {MQTT_BROKER}:{MQTT_PORT}...")
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
         client.loop_forever() 
+    except KeyboardInterrupt:
+        logger.info("🛑 Cliente MQTT recebendo sinal de desligamento...")
+        client.disconnect()
     except Exception as e:
         logger.critical(f"CRÍTICO: Não foi possível conectar ao broker MQTT. Verifique o endereço e a rede. Erro: {e}", exc_info=True)
 

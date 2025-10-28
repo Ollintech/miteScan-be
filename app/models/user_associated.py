@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from db.database import Base
+from sqlalchemy.orm import relationship
 
 class UserAssociated(Base):
     __tablename__ = 'users_associated'
@@ -12,3 +13,5 @@ class UserAssociated(Base):
     status = Column(Boolean, nullable = False, default = False)
     access_id = Column(Integer, ForeignKey('accesses.id'), nullable = False)
     user_root_id = Column(Integer, ForeignKey('users_root.id'), nullable = False)
+
+    access = relationship("Access")

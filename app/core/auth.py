@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from db.database import get_db
 from core.config import settings
 from models.user_root import UserRoot
-from models.users_associated import UserAssociated
+from models.user_associated import UserAssociated
 from typing import Type, Union, Optional
 
 secret_key = settings.secret_key

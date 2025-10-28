@@ -1,19 +1,15 @@
 from fastapi import FastAPI, Depends
 import uvicorn, os
 from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor, auth_routes
-from db.database import Base, engine, get_db
+from db.database import Base, engine
 from core.middleware import ActiveUserMiddleware
-from seed import seed_data
 from mqtt_handler import run_mqtt_in_background
-from sqlalchemy.orm import Session
-from schemas.sensor import SensorRead
-from routes.sensor import receive_data
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from seed import seed_data
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    seed_data()
     if not os.getenv("TESTING"):
         await run_mqtt_in_background()
     yield
@@ -42,21 +38,8 @@ app.include_router(hive_analysis.router)
 app.include_router(sensor.router)
 app.include_router(auth_routes.router)
 
-@app.post("/sensor")
-async def receive_sensor_data(data: dict, db: Session = Depends(get_db)):
-    print("Sensor:", data)
-
-    try:
-        sensor_data = SensorRead(**data)
-        receive_data(sensor_data, db)
-
-        print(f"Dados recebidos e processados.")
-    except Exception as e:
-        print(f"Erro ao processar os dados: {e}")
-
-    return {"status": "ok"}
-
 if __name__ == "__main__":
+    seed_data()
     import multiprocessing
     import sys
     if sys.platform.startswith("win"):

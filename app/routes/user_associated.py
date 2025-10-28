@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, APIRouter, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from db.database import get_db
-from models.users_associated import UserAssociated
+from models.user_associated import UserAssociated
 from models.user_root import UserRoot
 from schemas.user_associated import UserAssociatedCreate, UserAssociatedResponse, UserAssociatedUpdate
 from core.auth import (get_password_hash, authenticate_user_associated,

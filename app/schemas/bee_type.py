@@ -3,14 +3,12 @@ from typing import Optional
 
 class BeeTypeCreate(BaseModel):
     name: str
-    description: str
-    user_root_id: int
+    description: Optional[str] = None
 
 class BeeTypeResponse(BaseModel):
     id: int
     name: str
-    description: str
-    user_root_id: int
+    description: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -18,4 +16,3 @@ class BeeTypeResponse(BaseModel):
 class BeeTypeUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    user_root_id: Optional[int] = None

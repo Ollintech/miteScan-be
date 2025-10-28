@@ -56,8 +56,8 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento.
 
     ```env
     # --- Configuração do Banco de Dados (Exemplo com PostgreSQL) ---
-    # Formato: postgresql://<user>:<password>@<host>:<port>/<dbname>
-    DATABASE_URL="postgresql://postgres:admin@localhost:5432/mitescan_db"
+    # Cole aqui a URL de conexão do Supabase
+    DATABASE_URL="postgres://postgres:[SUA-SENHA]@[HOST-DO-SUPABASE]:5432/postgres"
 
     # --- Configuração de Autenticação (JWT) ---
     # Gere uma chave segura (ex: usando `openssl rand -hex 32`)

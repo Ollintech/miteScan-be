@@ -81,6 +81,7 @@ def login_user_associated(form_data: OAuth2PasswordRequestForm = Depends(), db: 
             "id": user_associated.id,
             "name": user_associated.name,
             "email": user_associated.email,
+            "user_root": user_associated.user_root_id,
             "role": "associated" 
         }
     }

@@ -19,6 +19,7 @@ class UserAssociatedResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    status: bool
     access_id: int
     user_root_id: int
 
@@ -29,5 +30,6 @@ class UserAssociatedUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    status: Optional[bool] = False
     access_id: Optional[int] = None
     user_root_id: Optional[int] = None

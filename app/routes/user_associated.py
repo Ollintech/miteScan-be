@@ -168,6 +168,9 @@ def update_user_associated(
     if user_associated_update.access_id:
         user_associated.access_id = user_associated_update.access_id
 
+    if user_associated_update.status is not None:
+        user_associated.status = user_associated_update.status
+
     db.commit()
     db.refresh(user_associated)
 

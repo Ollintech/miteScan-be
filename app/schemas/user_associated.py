@@ -4,9 +4,9 @@ from typing import Optional
 class UserAssociatedCreate(BaseModel):
     name: str
     email: EmailStr
+    account: str
     password: str
     access_id: int
-    user_root_id: int
     
     @field_validator('password')
     @classmethod
@@ -19,9 +19,9 @@ class UserAssociatedResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    account: str
     status: bool
     access_id: int
-    user_root_id: int
 
     class Config:
         from_attributes = True
@@ -29,7 +29,7 @@ class UserAssociatedResponse(BaseModel):
 class UserAssociatedUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
+    account: Optional[str] = None
     password: Optional[str] = None
     status: Optional[bool] = False
     access_id: Optional[int] = None
-    user_root_id: Optional[int] = None

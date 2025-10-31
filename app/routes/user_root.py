@@ -28,6 +28,7 @@ def register_user(user_data: UserRootCreate, db: Session = Depends(get_db)):
     new_user_root = UserRoot(
         name=user_data.name,
         email=user_data.email,
+        account = user_data.account,
         password_hash=get_password_hash(user_data.password),
         access_id=user_data.access_id,
         status=True,
@@ -45,25 +46,25 @@ def register_user(user_data: UserRootCreate, db: Session = Depends(get_db)):
 def profile_user(current_user: UserRoot = Depends(get_current_user_root)):
     return current_user
 
-@router.get("/{user_root_id}", response_model=UserRootResponse)
-def get_user_root(user_root_id: int, db: Session = Depends(get_db)):
-    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+@router.get("/{account}", response_model=UserRootResponse)
+def get_user_root(account: str, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.account == account).first()
     if not user_root:
         raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
     return user_root
 
-@router.get('/{user_root_id}', response_model = UserAssociatedResponse)
-def get_all_users_associated(user_root_id: int, db: Session = Depends(get_db)):
-    users_associated = db.query(UserAssociated).filter(UserRoot.id == user_root_id).all()
+@router.get('/{account}/users_associated', response_model = UserAssociatedResponse)
+def get_all_users_associated(account: str, db: Session = Depends(get_db)):
+    users_associated = db.query(UserAssociated).filter(UserRoot.account == account).all()
 
     if not users_associated:
         raise HTTPException(status_code = 404, detail = 'Usuários Associados não encontrados.')
     
     return users_associated
 
-@router.put("/{user_root_id}", response_model=UserRootResponse)
-def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Session = Depends(get_db)):
-    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+@router.put("/{account}", response_model=UserRootResponse)
+def update_user_root(account: str, user_root_update: UserRootUpdate, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.account == account).first()
     if not user_root:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
 
@@ -74,6 +75,11 @@ def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Se
         if db.query(UserRoot).filter(UserRoot.email == user_root_update.email).first():
             raise HTTPException(status_code=400, detail="Email já cadastrado.")
         user_root.email = user_root_update.email
+
+    if user_root_update.account and user_root_update.account != user_root.account:
+        if db.query(UserRoot).filter(UserRoot.account == user_root_update.account).first():
+            raise HTTPException(status_code=400, detail="Conta já cadastrada.")
+        user_root.account = user_root_update.account
 
     if user_root_update.password:
         user_root.password_hash = get_password_hash(user_root_update.password)
@@ -89,20 +95,20 @@ def update_user_root(user_root_id: int, user_root_update: UserRootUpdate, db: Se
 
     return user_root
 
-@router.delete("/{user_root_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user_root(user_root_id: int, db: Session = Depends(get_db)):
-    user_root = db.query(UserRoot).filter(UserRoot.id == user_root_id).first()
+@router.delete("/{account}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_root(account: str, db: Session = Depends(get_db)):
+    user_root = db.query(UserRoot).filter(UserRoot.account == account).first()
     if not user_root:
         raise HTTPException(status_code=404, detail="Usuário Raiz não encontrado.")
 
     try:
-        hives = db.query(Hive).filter(Hive.user_root_id == user_root_id).all()
+        hives = db.query(Hive).filter(Hive.account == account).all()
         for hive in hives:
             db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive.id).delete(synchronize_session=False)
             db.query(Sensor).filter(Sensor.hive_id == hive.id).delete(synchronize_session=False)
             db.delete(hive)
 
-        db.query(UserAssociated).filter(UserAssociated.user_root_id == user_root_id).delete(synchronize_session=False)
+        db.query(UserAssociated).filter(UserAssociated.account == account).delete(synchronize_session=False)
         
         db.delete(user_root)
         db.commit()

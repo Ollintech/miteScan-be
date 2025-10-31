@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from .access import Access
-from .users_associated import UserAssociated
+from .user_associated import UserAssociated
 from .user_root import UserRoot
 from .bee_type import BeeType
 from .hive import Hive

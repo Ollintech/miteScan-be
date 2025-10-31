@@ -4,6 +4,7 @@ from typing import Optional
 class UserRootCreate(BaseModel):
     name: str
     email: EmailStr
+    account: str
     password: str
     access_id: int
 
@@ -18,6 +19,7 @@ class UserRootResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    account: str
     status: bool
     access_id: int
 
@@ -27,6 +29,7 @@ class UserRootResponse(BaseModel):
 class UserRootUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
+    account: Optional[str] = None
     password: Optional[str] = None
     status: Optional[bool] = False
     access_id: Optional[int] = None

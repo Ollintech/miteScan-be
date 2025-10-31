@@ -40,10 +40,10 @@ def seed_data():
 
         # --- 2. Usuários Root ---
         root_users_data = [
-            {"name": "Ana Flávia", "email": "ana@mitescan.com", "password_hash": get_password_hash("anaflavia123"), "status": True},
-            {"name": "Isabely Lemos", "email": "isabely@mitescan.com", "password_hash": get_password_hash("isabely123"), "status": True},
-            {"name": "Gustavo Lanna", "email": "gustavo@mitescan.com", "password_hash": get_password_hash("gustavo123"), "status": True},
-            {"name": "Yasmin Pires", "email": "yasmin@mitescan.com", "password_hash": get_password_hash("yasmin123"), "status": True},
+            {"name": "Ana Flávia", "email": "ana@mitescan.com", "account": "anaflavia", "password_hash": get_password_hash("anaflavia123"), "status": True},
+            {"name": "Isabely Lemos", "email": "isabely@mitescan.com", "account": "isabely", "password_hash": get_password_hash("isabely123"), "status": True},
+            {"name": "Gustavo Lanna", "email": "gustavo@mitescan.com", "account": "gustavo", "password_hash": get_password_hash("gustavo123"), "status": True},
+            {"name": "Yasmin Pires", "email": "yasmin@mitescan.com", "account": "yasmin", "password_hash": get_password_hash("yasmin123"), "status": True},
         ]
 
         for user in root_users_data:
@@ -53,6 +53,7 @@ def seed_data():
                 new_user = UserRootModel.UserRoot(
                     name=user["name"],
                     email=user["email"],
+                    account=user["account"],
                     password_hash=user["password_hash"],
                     access_id=owner_access_id, # Todos são owners aqui
                     status=user["status"]
@@ -64,15 +65,15 @@ def seed_data():
         db.commit()
 
         # Buscar IDs dos usuários root
-        ana_id = db.query(UserRootModel.UserRoot.id).filter(UserRootModel.UserRoot.email == "ana@mitescan.com").scalar()
-        isabely_id = db.query(UserRootModel.UserRoot.id).filter(UserRootModel.UserRoot.email == "isabely@mitescan.com").scalar()
-        gustavo_id = db.query(UserRootModel.UserRoot.id).filter(UserRootModel.UserRoot.email == "gustavo@mitescan.com").scalar()
-        yasmin_id = db.query(UserRootModel.UserRoot.id).filter(UserRootModel.UserRoot.email == "yasmin@mitescan.com").scalar()
+        ana_account = db.query(UserRootModel.UserRoot.account).filter(UserRootModel.UserRoot.email == "ana@mitescan.com").scalar()
+        isabely_account = db.query(UserRootModel.UserRoot.account).filter(UserRootModel.UserRoot.email == "isabely@mitescan.com").scalar()
+        gustavo_account = db.query(UserRootModel.UserRoot.account).filter(UserRootModel.UserRoot.email == "gustavo@mitescan.com").scalar()
+        yasmin_account = db.query(UserRootModel.UserRoot.account).filter(UserRootModel.UserRoot.email == "yasmin@mitescan.com").scalar()
         
         # --- 3. Usuários Associados (Novo) ---
         associated_users_data = [
-            {"name": "Funcionário BeeTech", "email": "employee@beetech.com", "password_hash": get_password_hash("employee123"), "access_id": employee_access_id, "user_root_id": ana_id},
-            {"name": "Gerente MiteScan", "email": "manager@mitescan.com", "password_hash": get_password_hash("manager123"), "access_id": manager_access_id, "user_root_id": isabely_id},
+            {"name": "Funcionário BeeTech", "email": "employee@beetech.com", "account": ana_account, "password_hash": get_password_hash("employee123"), "access_id": employee_access_id},
+            {"name": "Gerente MiteScan", "email": "manager@mitescan.com", "account": isabely_account, "password_hash": get_password_hash("manager123"), "access_id": manager_access_id},
         ]
 
         for user in associated_users_data:
@@ -84,7 +85,7 @@ def seed_data():
                     email=user["email"],
                     password_hash=user["password_hash"],
                     access_id=user["access_id"], # Usa o ID do loop
-                    user_root_id=user["user_root_id"]
+                    account=user["account"]
                 )
                 db.add(new_user)
                 print(f"Usuário Associado '{user['name']}' criado com sucesso.")
@@ -93,10 +94,7 @@ def seed_data():
 
         # --- 4. Tipos de Abelha ---
         bee_types_data = [
-            {"name": "Jataí", "description": "A abelha Jataí é uma espécie de abelha sem ferrão..."},
-            {"name": "Mandaçaia", "description": "A Mandaçaia é uma abelha sem ferrão..."},
-            {"name": "Uruçu", "description": "A Uruçu é uma espécie de abelha sem ferrão..."},
-            {"name": "Irapuca", "description": "A Irapuca é uma abelha sem ferrão..."},
+            {"name": "Apis Mellifera", "description": "A abelha Apis Mellifera é uma espécie de abelha sem ferrão..."}
         ]
         
         for bee_type in bee_types_data:
@@ -114,17 +112,14 @@ def seed_data():
         db.commit()
 
         # Buscar IDs dos tipos de abelha
-        jatai_id = db.query(BeeTypeModel.BeeType.id).filter(BeeTypeModel.BeeType.name == "Jataí").scalar()
-        mandacaia_id = db.query(BeeTypeModel.BeeType.id).filter(BeeTypeModel.BeeType.name == "Mandaçaia").scalar()
-        urucu_id = db.query(BeeTypeModel.BeeType.id).filter(BeeTypeModel.BeeType.name == "Uruçu").scalar()
-        irapuca_id = db.query(BeeTypeModel.BeeType.id).filter(BeeTypeModel.BeeType.name == "Irapuca").scalar()
-
+        apis_id = db.query(BeeTypeModel.BeeType.id).filter(BeeTypeModel.BeeType.name == "Apis Mellifera").scalar()
+        
         # --- 5. Colmeias ---
         hives_data = [
-            {"user_root_id": ana_id, "bee_type_id": jatai_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": 2}, # Média
-            {"user_root_id": isabely_id, "bee_type_id": mandacaia_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": 3}, # Grande
-            {"user_root_id": gustavo_id, "bee_type_id": urucu_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": 1}, # Pequena
-            {"user_root_id": yasmin_id, "bee_type_id": irapuca_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": 2}, # Média
+            {"account": ana_account, "bee_type_id": apis_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": 2}, # Média
+            {"account": isabely_account, "bee_type_id": apis_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": 3}, # Grande
+            {"account": gustavo_account, "bee_type_id": apis_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": 1}, # Pequena
+            {"account": yasmin_account, "bee_type_id": apis_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": 2}, # Média
         ]
         
         for hive in hives_data:
@@ -132,7 +127,7 @@ def seed_data():
             
             if not existing_hive:
                 new_hive = HiveModel.Hive(
-                    user_root_id=hive["user_root_id"],
+                    account=hive["account"],
                     bee_type_id=hive["bee_type_id"],
                     location_lat=hive["location_lat"],
                     location_lng=hive["location_lng"],
@@ -170,10 +165,10 @@ def seed_data():
 
         # --- 7. Análises de Colmeia ---
         analyses_data = [
-            {"hive_id": hive1_id, "user_root_id": ana_id, "image_path": "image1.jpg", "varroa_detected": True, "detection_confidence": 0.92, "created_at": datetime.utcnow()},
-            {"hive_id": hive2_id, "user_root_id": isabely_id, "image_path": "image2.jpg", "varroa_detected": False, "detection_confidence": 0.98, "created_at": datetime.utcnow()},
-            {"hive_id": hive3_id, "user_root_id": gustavo_id, "image_path": "image3.jpg", "varroa_detected": True, "detection_confidence": 0.85, "created_at": datetime.utcnow()},
-            {"hive_id": hive4_id, "user_root_id": yasmin_id, "image_path": "image4.jpg", "varroa_detected": False, "detection_confidence": 0.99, "created_at": datetime.utcnow()},
+            {"hive_id": hive1_id, "account": ana_account, "image_path": "image1.jpg", "varroa_detected": True, "detection_confidence": 0.92, "created_at": datetime.utcnow()},
+            {"hive_id": hive2_id, "account": isabely_account, "image_path": "image2.jpg", "varroa_detected": False, "detection_confidence": 0.98, "created_at": datetime.utcnow()},
+            {"hive_id": hive3_id, "account": gustavo_account, "image_path": "image3.jpg", "varroa_detected": True, "detection_confidence": 0.85, "created_at": datetime.utcnow()},
+            {"hive_id": hive4_id, "account": yasmin_account, "image_path": "image4.jpg", "varroa_detected": False, "detection_confidence": 0.99, "created_at": datetime.utcnow()},
         ]
         
         # Buscar IDs das análises
@@ -189,7 +184,7 @@ def seed_data():
             if not existing_analysis:
                 new_analysis = AnalysisModel.HiveAnalysis(
                     hive_id=analysis["hive_id"],
-                    user_root_id=analysis["user_root_id"],
+                    account=analysis["account"],
                     image_path=analysis["image_path"],
                     varroa_detected=analysis["varroa_detected"],
                     detection_confidence=analysis["detection_confidence"],
@@ -208,8 +203,8 @@ def seed_data():
 
         # --- 8. Backups de Análises ---
         backups_data = [
-            {"analysis_id": analysis1.id, "user_root_id": ana_id, "file_path": "backup/image1.jpg"} if analysis1 else None,
-            {"analysis_id": analysis3.id, "user_root_id": gustavo_id, "file_path": "backup/image3.jpg"} if analysis3 else None,
+            {"analysis_id": analysis1.id, "account": ana_account, "file_path": "backup/image1.jpg"} if analysis1 else None,
+            {"analysis_id": analysis3.id, "account": gustavo_account, "file_path": "backup/image3.jpg"} if analysis3 else None,
         ]
 
         for backup in backups_data:
@@ -220,7 +215,7 @@ def seed_data():
             if not existing_backup:
                 new_backup = AnalysisBackupModel.AnalysisBackup(
                     analysis_id=backup["analysis_id"],
-                    user_root_id=backup["user_root_id"],
+                    account=backup["account"],
                     file_path=backup["file_path"]
                 )
                 db.add(new_backup)

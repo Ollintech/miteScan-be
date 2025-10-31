@@ -3,7 +3,7 @@ from datetime import datetime
 
 class HiveAnalysisCreate(BaseModel):
     hive_id: int
-    user_root_id: int
+    account: str
     image_path: str
     varroa_detected: bool = False
     detection_confidence: float
@@ -11,7 +11,7 @@ class HiveAnalysisCreate(BaseModel):
 class HiveAnalysisResponse(BaseModel):
     id: int
     hive_id: int
-    user_root_id: int
+    account: str
     image_path: str
     varroa_detected: bool = False
     detection_confidence: float

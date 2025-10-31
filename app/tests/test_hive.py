@@ -19,6 +19,7 @@ def create_user_and_bee_type(client, db: Session):
     user = UserRoot(
         name="Usuário Teste",
         email="teste@teste.com",
+        account="teste",
         password_hash="hashed-password", # Em um cenário real, use get_password_hash
         status=True, 
         access_id=access.id
@@ -52,7 +53,7 @@ def test_create_hive_success(client, db):
     }
 
     # A rota agora é aninhada sob o ID do usuário root
-    response = client.post(f"/{user.id}/hives/create", json=payload, headers=headers)
+    response = client.post(f"/{user.account}/hives/create", json=payload, headers=headers)
 
     print("Response Status Code:", response.status_code)
     print("Response Body:", response.json())
@@ -60,7 +61,7 @@ def test_create_hive_success(client, db):
     assert response.status_code == 201
     data = response.json()
     assert data["location_lat"] == payload["location_lat"]
-    assert data["user_root_id"] == user.id
+    assert data["account"] == user.account
 
 
 def test_create_hive_duplicate_location(client, db):
@@ -68,7 +69,7 @@ def test_create_hive_duplicate_location(client, db):
 
     # Cria uma colmeia inicial com uma localização específica
     hive = Hive(
-        user_root_id=user.id,
+        account=user.account,
         bee_type_id=bee_type.id,
         location_lat=-10.0,
         location_lng=10.0,
@@ -86,7 +87,7 @@ def test_create_hive_duplicate_location(client, db):
         "location_lng": 10.0,
         "size": "Pequena",
     }
-    response = client.post(f"/{user.id}/hives/create", json=payload, headers=headers)
+    response = client.post(f"/{user.account}/hives/create", json=payload, headers=headers)
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Uma colmeia já foi cadastrada nessa localização."
@@ -97,7 +98,7 @@ def test_get_hive_success(client, db):
 
     # Criação de uma colmeia para teste
     hive = Hive(
-        user_root_id=user.id, 
+        account=user.account, 
         bee_type_id=bee_type.id,
         location_lat=1.1,
         location_lng=2.2,
@@ -110,7 +111,7 @@ def test_get_hive_success(client, db):
     db.refresh(hive)
 
     # Requisição para obter a colmeia
-    response = client.get(f"/{user.id}/hives/{hive.id}", headers=headers)
+    response = client.get(f"/{user.account}/hives/{hive.id}", headers=headers)
     assert response.status_code == 200
     assert response.json()["size"] == "Média"
     assert response.json()["location_lat"] == 1.1
@@ -120,7 +121,7 @@ def test_get_hive_not_found(client, db):
     user, _, headers = create_user_and_bee_type(client, db)
 
     # Tenta obter uma colmeia inexistente
-    response = client.get(f"/{user.id}/hives/9999", headers=headers)
+    response = client.get(f"/{user.account}/hives/9999", headers=headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Colmeia não encontrada."
 
@@ -130,7 +131,7 @@ def test_update_hive_success(client, db):
 
     # Criação de uma colmeia para teste
     hive = Hive(
-        user_root_id=user.id,
+        account=user.account,
         bee_type_id=bee_type.id,
         location_lat=3.3,
         location_lng=4.4,
@@ -143,7 +144,7 @@ def test_update_hive_success(client, db):
     db.refresh(hive)
 
     # Atualização da colmeia
-    response = client.put(f"/{user.id}/hives/{hive.id}", json={
+    response = client.put(f"/{user.account}/hives/{hive.id}", json={
         "size": "Grande",
     }, headers=headers)
 
@@ -155,7 +156,7 @@ def test_update_hive_not_found(client, db):
     user, _, headers = create_user_and_bee_type(client, db)
 
     # Tenta atualizar uma colmeia inexistente
-    response = client.put(f"/{user.id}/hives/9999", json={"size": "Grande"}, headers=headers)
+    response = client.put(f"/{user.account}/hives/9999", json={"size": "Grande"}, headers=headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Colmeia não encontrada."
 
@@ -165,7 +166,7 @@ def test_delete_hive_success(client, db):
 
     # Criação de uma colmeia para teste
     hive = Hive(
-        user_root_id=user.id,
+        account=user.account,
         bee_type_id=bee_type.id,
         location_lat=5.5,
         location_lng=6.6,
@@ -178,7 +179,7 @@ def test_delete_hive_success(client, db):
     db.refresh(hive)
 
     # Exclusão da colmeia
-    response = client.delete(f"/{user.id}/hives/{hive.id}", headers=headers)
+    response = client.delete(f"/{user.account}/hives/{hive.id}", headers=headers)
     assert response.status_code == 204
     assert db.query(Hive).filter(Hive.id == hive.id).first() is None
 
@@ -187,6 +188,6 @@ def test_delete_hive_not_found(client, db):
     user, _, headers = create_user_and_bee_type(client, db)
 
     # Tenta excluir uma colmeia inexistente
-    response = client.delete(f"/{user.id}/hives/9999", headers=headers)
+    response = client.delete(f"/{user.account}/hives/9999", headers=headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Colmeia não encontrada."

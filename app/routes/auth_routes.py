@@ -30,7 +30,7 @@ def login_user_root(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessio
 
     token_data = {
         "sub": user_root.email,
-        "user_root_id": user_root.id,
+        "account": user_root.account,
         "access_id": user_root.access_id
     }
     access_token = create_access_token(data=token_data)
@@ -42,6 +42,7 @@ def login_user_root(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessio
             "id": user_root.id,
             "name": user_root.name,
             "email": user_root.email,
+            "account": user_root.account,
             "status": user_root.status,
             "access_id": user_root.access_id,
             "role": "root"
@@ -81,7 +82,8 @@ def login_user_associated(form_data: OAuth2PasswordRequestForm = Depends(), db: 
             "id": user_associated.id,
             "name": user_associated.name,
             "email": user_associated.email,
-            "user_root": user_associated.user_root_id,
+            "account": user_associated.account,
+            "status": user_associated.status,
             "role": "associated" 
         }
     }

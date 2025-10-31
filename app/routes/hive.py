@@ -13,19 +13,19 @@ from core.auth import (
     get_current_user_associated_optional
 )
 
-router = APIRouter(prefix='/{user_root_id}/hives', tags=['Hives'])
+router = APIRouter(prefix='/{account}/hives', tags=['Hives'])
 
 def get_viewer_access(
-    user_root_id: int,
+    account: str,
     current_user_root: UserRoot = Depends(get_current_user_root_optional),
     current_user_associated: UserAssociated = Depends(get_current_user_associated_optional)
 ):
     """Verifica se o usuário logado é o Root dono ou um Associado dele."""
     
-    if current_user_root and current_user_root.id == user_root_id:
+    if current_user_root and current_user_root.account == account:
         return current_user_root 
 
-    if current_user_associated and current_user_associated.user_root_id == user_root_id:
+    if current_user_associated and current_user_associated.account == account:
         return current_user_associated 
 
     if not current_user_root and not current_user_associated:
@@ -34,22 +34,22 @@ def get_viewer_access(
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado para este recurso")
 
 
-def check_root_permission(user_root_id: int, current_user_root: UserRoot):
+def check_root_permission(account: str, current_user_root: UserRoot):
     """Verifica se o root logado é o mesmo da URL (para CUD)."""
     if not current_user_root:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado como usuário root")
-    if current_user_root.id != user_root_id:
+    if current_user_root.account != account:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ação não permitida")
     
 
 @router.post('/create', response_model=HiveResponse, status_code=status.HTTP_201_CREATED)
 def create_hive(
-    user_root_id: int,
+    account: str,
     hive: HiveCreate, 
     db: Session = Depends(get_db), 
     current_user_root: UserRoot = Depends(get_current_user_root)
 ):
-    check_root_permission(user_root_id, current_user_root) 
+    check_root_permission(account, current_user_root) 
 
     if db.query(Hive).filter(
         Hive.location_lat == hive.location_lat,
@@ -58,7 +58,7 @@ def create_hive(
         raise HTTPException(status_code=400, detail='Uma colmeia já foi cadastrada nessa localização.')
 
     new_hive = Hive(
-        user_root_id = user_root_id, 
+        account = account, 
         bee_type_id=hive.bee_type_id,
         location_lat=hive.location_lat,
         location_lng=hive.location_lng,
@@ -76,11 +76,10 @@ def create_hive(
 
 @router.get('/all', response_model=List[HiveResponse])
 def get_all_hives(
-    user_root_id: int,
-    db: Session = Depends(get_db), 
-    user_principal = Depends(get_viewer_access)
+    account: str,
+    db: Session = Depends(get_db)
 ):
-    hives = db.query(Hive).filter(Hive.user_root_id == user_root_id).all()
+    hives = db.query(Hive).filter(Hive.account == account).all()
 
     if not hives:
         raise HTTPException(status_code=404, detail='Não existem colmeias cadastradas para este usuário.')
@@ -90,14 +89,13 @@ def get_all_hives(
 
 @router.get('/{hive_id}', response_model=HiveResponse)
 def get_hive(
-    user_root_id: int,
+    account: str,
     hive_id: int, 
-    db: Session = Depends(get_db), 
-    user_principal = Depends(get_viewer_access)
+    db: Session = Depends(get_db)
 ):
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_root_id == user_root_id
+        Hive.account == account
     ).first()
 
     if not hive:
@@ -108,17 +106,17 @@ def get_hive(
 
 @router.put('/{hive_id}', response_model=HiveResponse)
 def update_hive(
-    user_root_id: int,
+    account: str,
     hive_id: int, 
     hive_update: HiveUpdate, 
     db: Session = Depends(get_db), 
     current_user_root: UserRoot = Depends(get_current_user_root)
 ):
-    check_root_permission(user_root_id, current_user_root) 
+    check_root_permission(account, current_user_root) 
 
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_root_id == user_root_id
+        Hive.account == account
     ).first()
 
     if not hive:
@@ -145,17 +143,17 @@ def update_hive(
 
 @router.delete('/{hive_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_hive(
-    user_root_id: int,
+    account: str,
     hive_id: int, 
     db: Session = Depends(get_db), 
     current_user_root: UserRoot = Depends(get_current_user_root), 
     confirm: Optional[bool] = Query(False) 
 ):
-    check_root_permission(user_root_id, current_user_root) 
+    check_root_permission(account, current_user_root) 
 
     hive = db.query(Hive).filter(
         Hive.id == hive_id,
-        Hive.user_root_id == user_root_id
+        Hive.account == account
     ).first()
 
     if not hive:

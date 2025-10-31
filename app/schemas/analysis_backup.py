@@ -3,13 +3,13 @@ from datetime import datetime
 
 class AnalysisBackupCreate(BaseModel):
     analysis_id: int
-    user_root_id: int
+    account: str
     file_path: str
 
 class AnalysisBackupResponse(BaseModel):
     id: int
     analysis_id: int
-    user_root_id: int
+    account: str
     file_path: str
     created_at: datetime
 

@@ -13,7 +13,7 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
 
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_analysis.hive_id,
-        user_root_id = hive_analysis.user_root_id,
+        account = hive_analysis.account,
         image_path = hive_analysis.image_path,
         varroa_detected = hive_analysis.varroa_detected,
         detection_confidence = hive_analysis.detection_confidence

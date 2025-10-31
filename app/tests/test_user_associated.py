@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.orm import Session
 from models.user_root import UserRoot
-from models.users_associated import UserAssociated
+from models.user_associated import UserAssociated
 from models.access import Access
 from core.auth import get_password_hash, create_access_token
 
@@ -24,6 +24,7 @@ def setup_data(db: Session):
     user_root = UserRoot(
         name="Dono Teste",
         email="dono@teste.com",
+        account="dono_teste",
         password_hash=get_password_hash("senha123"),
         access_id=access_root.id,
         status=True
@@ -33,7 +34,7 @@ def setup_data(db: Session):
     db.refresh(user_root)
 
     # Cria Token para o Root
-    token = create_access_token({"sub": user_root.email, "id": user_root.id, "type": "root"})
+    token = create_access_token({"sub": user_root.email, "account": user_root.account, "type": "root"})
     headers = {"Authorization": f"Bearer {token}"}
 
     return user_root, access_employee, headers
@@ -45,16 +46,17 @@ def test_create_user_associated_success(client, db: Session, setup_data):
         "name": "Funcionário Teste",
         "email": "func@teste.com",
         "password": "outrasenha",
-        "access_id": access_employee.id
+        "access_id": access_employee.id,
+        "account": user_root.account
     }
 
-    response = client.post(f"/users_root/{user_root.id}/users_associated/register", json=user_associated_data, headers=headers)
+    response = client.post(f"/{user_root.account}/users_associated/register", json=user_associated_data, headers=headers)
 
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == user_associated_data["name"]
     assert data["email"] == user_associated_data["email"]
-    assert data["user_root_id"] == user_root.id
+    assert data["account"] == user_root.account
     assert "id" in data
 
 def test_create_user_associated_duplicate_email(client, db: Session, setup_data):
@@ -66,7 +68,7 @@ def test_create_user_associated_duplicate_email(client, db: Session, setup_data)
         email="existente@teste.com",
         password_hash=get_password_hash("senha"),
         access_id=access_employee.id,
-        user_root_id=user_root.id
+        account=user_root.account
     )
     db.add(existing_user)
     db.commit()
@@ -76,10 +78,11 @@ def test_create_user_associated_duplicate_email(client, db: Session, setup_data)
         "name": "Outro Funcionário",
         "email": "existente@teste.com",
         "password": "outrasenha",
-        "access_id": access_employee.id
+        "access_id": access_employee.id,
+        "account": user_root.account
     }
 
-    response = client.post(f"/users_root/{user_root.id}/users_associated/register", json=user_associated_data, headers=headers)
+    response = client.post(f"/{user_root.account}/users_associated/register", json=user_associated_data, headers=headers)
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Email já cadastrado."
@@ -92,16 +95,14 @@ def test_get_user_associated_success(client, db: Session, setup_data):
         email="buscar@teste.com",
         password_hash=get_password_hash("senha"),
         access_id=access_employee.id,
-        user_root_id=user_root.id
+        account=user_root.account
     )
     db.add(user_associated)
     db.commit()
     db.refresh(user_associated)
 
-    # Supondo que a rota para buscar um usuário associado seja /users_root/{user_root_id}/users_associated/{user_associated_id}
-    # Esta rota não existe atualmente, mas é uma sugestão de como testar.
-    # Por enquanto, vamos testar a listagem.
-    response = client.get(f"/users_root/{user_root.id}/users_associated/all", headers=headers)
+    # A rota para listar todos os usuários associados de uma conta
+    response = client.get(f"/{user_root.account}/users_associated/", headers=headers)
 
     assert response.status_code == 200
     assert len(response.json()) > 0
@@ -115,12 +116,12 @@ def test_delete_user_associated_success(client, db: Session, setup_data):
         email="deletar@teste.com",
         password_hash=get_password_hash("senha"),
         access_id=access_employee.id,
-        user_root_id=user_root.id
+        account=user_root.account
     )
     db.add(user_to_delete)
     db.commit()
     db.refresh(user_to_delete)
 
-    # Supondo que a rota de deleção seja /users_root/{user_root_id}/users_associated/{user_associated_id}
-    response = client.delete(f"/users_root/{user_root.id}/users_associated/{user_to_delete.id}", headers=headers)
+    # Rota de deleção
+    response = client.delete(f"/{user_root.account}/users_associated/{user_to_delete.id}", headers=headers)
     assert response.status_code == 204

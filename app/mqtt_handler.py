@@ -29,20 +29,28 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode())
         
-        if 'id' not in data:
-            logger.warning(f"   -> Payload sem 'id' do dispositivo, ignorando. Payload: {data}")
+        api_payload = {
+            "hive_id": data.get("hive_id"),
+            "temperature": data.get("t"),
+            "humidity": data.get("h"),
+            "created_at": data.get("ts")
+        }
+
+        if not api_payload["hive_id"]:
+            logger.warning(f"  -> Payload sem 'id' da colmeia, ignorando. Payload: {data}")
             return
-        data['hive_id'] = data.pop('id')
-
-        logger.info(f"   -> Payload: {data}")
-        response = requests.post(API_URL, json=data)
+            
+        logger.info(f"  -> Payload traduzido: {api_payload}")
+        
+        response = requests.post(API_URL, json=api_payload)
         response.raise_for_status() 
-        logger.info(f"   -> ✅ Dados enviados para API com sucesso. Status: {response.status_code}")
+        logger.info(f"  -> ✅ Dados enviados para API com sucesso. Status: {response.status_code}")
+        
     except json.JSONDecodeError:
-        logger.error(f"   -> ❌ Erro ao decodificar JSON. Payload recebido: {msg.payload.decode()}", exc_info=True)
+        logger.error(f"  -> ❌ Erro ao decodificar JSON. Payload recebido: {msg.payload.decode()}", exc_info=True)
     except Exception as e:
-        logger.error(f"   -> ❌ Erro ao processar mensagem ou enviar para API: {e}", exc_info=True)
-
+        logger.error(f"  -> ❌ Erro ao processar mensagem ou enviar para API: {e}", exc_info=True)
+        
 def start_mqtt():
     """Inicializa e executa o loop do cliente MQTT."""
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)

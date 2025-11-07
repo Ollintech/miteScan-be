@@ -5,6 +5,7 @@ class Hive(Base):
     __tablename__ = 'hives'
 
     id = Column(Integer, primary_key = True)
+    name = Column(String(50), nullable=False)
     account = Column(String(50), ForeignKey('users_root.account'), nullable = False)
     bee_type_id = Column(Integer, ForeignKey('bee_types.id'))
     location_lat = Column(Float, nullable = False)

@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy import UniqueConstraint
 
 class HiveCreate(BaseModel):
+    name: str
     account: str
     bee_type_id: int
     location_lat: float
@@ -17,6 +18,7 @@ class HiveCreate(BaseModel):
 
 class HiveResponse(BaseModel):
     id: int
+    name: str
     account: str
     bee_type_id: int
     location_lat: float
@@ -29,6 +31,7 @@ class HiveResponse(BaseModel):
         from_attributes = True
 
 class HiveUpdate(BaseModel):
+    name: Optional[str] = None
     account: Optional[str] = None
     bee_type_id: Optional[int] = None
     location_lat: Optional[float] = None

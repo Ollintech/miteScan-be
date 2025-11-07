@@ -26,8 +26,11 @@ def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depend
     return new_hive_analysis
 
 @router.get('/all', response_model = list[HiveAnalysisResponse])
-def get_all_hive_analyses(hive_id: int | None = None, db: Session = Depends(get_db)):
-    query = db.query(HiveAnalysis).join(Hive)
+def get_all_hive_analyses(account: str, hive_id: int | None = None, db: Session = Depends(get_db)):
+    query = db.query(HiveAnalysis).join(Hive).filter(Hive.account == account)
+    
+    if not query:
+        raise HTTPException(status_code=404, detail='Não existem colmeias cadastradas para este usuário.')
 
     if hive_id is not None:
         query = query.filter(HiveAnalysis.hive_id == hive_id)

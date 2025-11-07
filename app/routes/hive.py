@@ -50,6 +50,12 @@ def create_hive(
     current_user_root: UserRoot = Depends(get_current_user_root)
 ):
     check_root_permission(account, current_user_root) 
+    
+    if db.query(Hive).filter(
+        Hive.name == hive.name,
+        Hive.account == hive.account
+    ).first():
+        raise HTTPException(status_code=400, detail='Uma colmeia com esse nome já foi cadastrada.')
 
     if db.query(Hive).filter(
         Hive.location_lat == hive.location_lat,
@@ -58,6 +64,7 @@ def create_hive(
         raise HTTPException(status_code=400, detail='Uma colmeia já foi cadastrada nessa localização.')
 
     new_hive = Hive(
+        name = hive.name,
         account = account, 
         bee_type_id=hive.bee_type_id,
         location_lat=hive.location_lat,
@@ -121,17 +128,31 @@ def update_hive(
 
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
+    
+    if hive_update.name:
+        if db.query(Hive).filter(
+            Hive.name == hive_update.name,
+            Hive.account == hive.account
+        ).first():
+            raise HTTPException(status_code=400, detail='Uma colmeia com esse nome já foi cadastrada.')
+        
+        hive.name = hive_update.name
 
     if hive_update.bee_type_id:
         hive.bee_type_id = hive_update.bee_type_id
+        
     if hive_update.location_lat:
         hive.location_lat = hive_update.location_lat
+        
     if hive_update.location_lng:
         hive.location_lng = hive_update.location_lng
+        
     if hive_update.size:
         hive.size = hive_update.size
+        
     if hive_update.humidity:
         hive.humidity = hive_update.humidity
+        
     if hive_update.temperature:
         hive.temperature = hive_update.temperature
 

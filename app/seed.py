@@ -116,10 +116,10 @@ def seed_data():
         
         # --- 5. Colmeias ---
         hives_data = [
-            {"account": ana_account, "bee_type_id": apis_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": 2}, # Média
-            {"account": isabely_account, "bee_type_id": apis_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": 3}, # Grande
-            {"account": gustavo_account, "bee_type_id": apis_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": 1}, # Pequena
-            {"account": yasmin_account, "bee_type_id": apis_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": 2}, # Média
+            {"name": "Colmeia 1" , "account": ana_account, "bee_type_id": apis_id, "location_lat": -23.5505, "location_lng": -46.6333, "size": 20}, # Média
+            {"name": "Colmeia 1", "account": isabely_account, "bee_type_id": apis_id, "location_lat": -23.5506, "location_lng": -46.6334, "size": 30}, # Grande
+            {"name": "Colmeia 1", "account": gustavo_account, "bee_type_id": apis_id, "location_lat": -23.5507, "location_lng": -46.6335, "size": 10}, # Pequena
+            {"name": "Colmeia 1", "account": yasmin_account, "bee_type_id": apis_id, "location_lat": -23.5508, "location_lng": -46.6336, "size": 20}, # Média
         ]
         
         for hive in hives_data:
@@ -127,6 +127,7 @@ def seed_data():
             
             if not existing_hive:
                 new_hive = HiveModel.Hive(
+                    name=hive["name"],
                     account=hive["account"],
                     bee_type_id=hive["bee_type_id"],
                     location_lat=hive["location_lat"],

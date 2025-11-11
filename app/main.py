@@ -6,7 +6,7 @@ from core.middleware import ActiveUserMiddleware
 from mqtt_handler import run_mqtt_in_background
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from seed import seed_data
+# from seed import seed_data
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -39,7 +39,7 @@ app.include_router(sensor.router)
 app.include_router(auth_routes.router)
 
 if __name__ == "__main__":
-    seed_data()
+    # seed_data()
     import multiprocessing
     import sys
     if sys.platform.startswith("win"):

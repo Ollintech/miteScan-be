@@ -17,8 +17,7 @@ def seed_data():
 
         # --- 1. Níveis de Acesso ---
         access_levels_data = [
-            {"name": "owner", "description": "Administrator access with unlimited permissions."},
-            {"name": "manager", "description": "Manager access with limited permissions."},
+            {"name": "Dono", "description": "Administrator access with unlimited permissions."},
             {"name": "employee", "description": "Employee access with limited permissions."}
         ]
         

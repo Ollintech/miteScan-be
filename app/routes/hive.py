@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from models.hive import Hive
 from models.sensor_readings import Sensor
+from models.hive_analysis import HiveAnalysis
 from models.user_root import UserRoot
 from models.user_associated import UserAssociated
 from schemas.hive import HiveCreate, HiveResponse, HiveUpdate
@@ -181,18 +182,28 @@ def delete_hive(
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
     
     sensores = db.query(Sensor).filter(Sensor.hive_id == hive_id).all()
+    analyses = db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).all()
 
-    if sensores and not confirm:
+    if (sensores or analyses) and not confirm:
+        details = []
+        if sensores:
+            details.append(f"{len(sensores)} leituras de sensores")
+        if analyses:
+            details.append(f"{len(analyses)} análises")
+        
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"A colmeia {hive_id} possui {len(sensores)} leituras de sensores associados. Envie 'confirm=true' na query para excluí-la mesmo assim."
+            detail=f"A colmeia {hive_id} possui {' e '.join(details)} associados. Envie 'confirm=true' na query para excluí-la mesmo assim."
         )
     
     try:
         if sensores:
             for sensor in sensores:
                 db.delete(sensor)
-            
+        if analyses:
+            for analysis in analyses:
+                db.delete(analysis)
+
         db.delete(hive)
         db.commit()
         

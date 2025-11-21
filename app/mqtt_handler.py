@@ -8,7 +8,7 @@ from core.config import settings
 
 MQTT_BROKER = settings.mqtt_broker
 MQTT_PORT = settings.mqtt_port
-MQTT_TOPIC_SUBSCRIBE = "mitescan/+/+"
+MQTT_TOPIC_SUBSCRIBE = "colmeia/+"
 API_URL = settings.api_sensor_url
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -30,12 +30,12 @@ def on_message(client, userdata, msg):
         data = json.loads(msg.payload.decode())
 
         topic_parts = msg.topic.split('/')
-        if len(topic_parts) != 3 or topic_parts[0] != 'mitescan':
-            logger.warning(f"  -> Tópico '{msg.topic}' fora do formato esperado 'mitescan/account/hive'. Ignorando.")
+        if len(topic_parts) != 2 or topic_parts[0] != 'colmeia':
+            logger.warning(f"  -> Tópico '{msg.topic}' fora do formato esperado 'colmeia/+'. Ignorando.")
             return
 
-        account_name = topic_parts[1]
-        hive_name = topic_parts[2]
+        account_name = data.get("conta_usuario")
+        hive_name = data.get("nome_colmeia")
         
         api_payload = {
             "account_name": account_name,

@@ -8,7 +8,7 @@ from core.config import settings
 
 MQTT_BROKER = settings.mqtt_broker
 MQTT_PORT = settings.mqtt_port
-MQTT_TOPIC = settings.mqtt_topic
+MQTT_TOPIC_SUBSCRIBE = "mitescan/+/+"
 API_URL = settings.api_sensor_url
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -18,8 +18,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
     """Callback para quando o cliente se conecta ao broker."""
     if rc == 0:
         logger.info("✅ Conectado ao broker MQTT com sucesso.")
-        client.subscribe(MQTT_TOPIC)
-        logger.info(f"   -> Inscrito no tópico: {MQTT_TOPIC}")
+        client.subscribe(MQTT_TOPIC_SUBSCRIBE)
+        logger.info(f"   -> Inscrito no tópico: {MQTT_TOPIC_SUBSCRIBE}")
     else:
         logger.error(f"❌ Falha ao conectar ao broker MQTT. Código: {rc}")
 
@@ -28,17 +28,21 @@ def on_message(client, userdata, msg):
     logger.info(f"📩 Mensagem recebida no tópico: {msg.topic}")
     try:
         data = json.loads(msg.payload.decode())
+
+        topic_parts = msg.topic.split('/')
+        if len(topic_parts) != 3 or topic_parts[0] != 'mitescan':
+            logger.warning(f"  -> Tópico '{msg.topic}' fora do formato esperado 'mitescan/account/hive'. Ignorando.")
+            return
+
+        account_name = topic_parts[1]
+        hive_name = topic_parts[2]
         
         api_payload = {
-            "hive_id": data.get("hive_id"),
+            "account_name": account_name,
+            "hive_name": hive_name,
             "temperature": data.get("t"),
-            "humidity": data.get("h"),
-            "created_at": data.get("ts")
+            "humidity": data.get("h")
         }
-
-        if not api_payload["hive_id"]:
-            logger.warning(f"  -> Payload sem 'id' da colmeia, ignorando. Payload: {data}")
-            return
             
         logger.info(f"  -> Payload traduzido: {api_payload}")
         

@@ -8,7 +8,7 @@ from core.config import settings
 
 MQTT_BROKER = settings.mqtt_broker
 MQTT_PORT = settings.mqtt_port
-MQTT_TOPIC_SUBSCRIBE = "colmeia/+"
+MQTT_TOPIC_SUBSCRIBE = settings.mqtt_topic
 API_URL = settings.api_sensor_url
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

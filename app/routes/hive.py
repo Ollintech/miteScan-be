@@ -131,10 +131,13 @@ def update_hive(
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
     
     if hive_update.name:
-        if db.query(Hive).filter(
+        duplicate_hive = db.query(Hive).filter(
             Hive.name == hive_update.name,
-            Hive.account == hive.account
-        ).first():
+            Hive.account == hive.account,
+            Hive.id != hive.id
+        ).first()
+
+        if duplicate_hive:
             raise HTTPException(status_code=400, detail='Uma colmeia com esse nome já foi cadastrada.')
         
         hive.name = hive_update.name

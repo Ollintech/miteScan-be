@@ -3,7 +3,6 @@ from datetime import datetime
 
 class HiveAnalysisCreate(BaseModel):
     hive_id: int
-    account: str
     image_path: str
     varroa_detected: bool = False
     detection_confidence: float

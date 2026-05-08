@@ -4,7 +4,6 @@ from sqlalchemy import UniqueConstraint
 
 class HiveCreate(BaseModel):
     name: str
-    account: str
     bee_type_id: int
     location_lat: float
     location_lng: float
@@ -32,7 +31,6 @@ class HiveResponse(BaseModel):
 
 class HiveUpdate(BaseModel):
     name: Optional[str] = None
-    account: Optional[str] = None
     bee_type_id: Optional[int] = None
     location_lat: Optional[float] = None
     location_lng: Optional[float] = None

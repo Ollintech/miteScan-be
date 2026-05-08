@@ -11,9 +11,13 @@ router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db)):
 
+    hive = db.query(Hive).filter(Hive.id == hive_analysis.hive_id).first()
+    if not hive:
+        raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
+
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_analysis.hive_id,
-        account = hive_analysis.account,
+        account = hive.account,
         image_path = hive_analysis.image_path,
         varroa_detected = hive_analysis.varroa_detected,
         detection_confidence = hive_analysis.detection_confidence

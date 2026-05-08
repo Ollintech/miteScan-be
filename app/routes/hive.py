@@ -54,7 +54,7 @@ def create_hive(
     
     if db.query(Hive).filter(
         Hive.name == hive.name,
-        Hive.account == hive.account
+        Hive.account == account
     ).first():
         raise HTTPException(status_code=400, detail='Uma colmeia com esse nome já foi cadastrada.')
 

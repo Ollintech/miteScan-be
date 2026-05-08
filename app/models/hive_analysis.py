@@ -9,5 +9,6 @@ class HiveAnalysis(Base):
     account = Column(String(50), ForeignKey('users_root.account'), nullable = False)
     image_path = Column(String(255), nullable = False)
     varroa_detected = Column(Boolean, nullable = False, default = False)
+    bee_status = Column(String(50), nullable = True)
     detection_confidence = Column(Float, nullable = False)
     created_at = Column(DateTime, default = func.now())

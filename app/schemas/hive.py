@@ -10,6 +10,7 @@ class HiveCreate(BaseModel):
     size: int
     humidity: Optional[float] = None
     temperature: Optional[float] = None
+    image_path: Optional[str] = None
 
     __table_args__ = (
         UniqueConstraint('location_lat', 'location_lng', name='unique_hive_location'),
@@ -25,6 +26,7 @@ class HiveResponse(BaseModel):
     size: int
     humidity: Optional[float] = None
     temperature: Optional[float] = None
+    image_path: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -37,3 +39,4 @@ class HiveUpdate(BaseModel):
     size: Optional[int] = None
     humidity: Optional[float] = None
     temperature: Optional[float] = None
+    image_path: Optional[str] = None

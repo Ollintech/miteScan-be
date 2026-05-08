@@ -6,6 +6,7 @@ from core.middleware import ActiveUserMiddleware
 from mqtt_handler import run_mqtt_in_background
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 # from seed import seed_data
 
 @asynccontextmanager
@@ -17,6 +18,9 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 Base.metadata.create_all(bind=engine)
+
+os.makedirs("uploads/hives", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

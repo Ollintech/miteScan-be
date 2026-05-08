@@ -1,7 +1,7 @@
 import torch
 from PIL import Image
 from torchvision import transforms
-from app.ai.model.cnn import MiteScanCNN
+from ai.model.cnn import MiteScanCNN
 
 classes = ["normal", "varroa", "deformada"]
 
@@ -29,14 +29,14 @@ def predict_image(image_path):
         output = model(img)
         probs = torch.softmax(output, dim=1)
 
-        classe_idx = torch.argmax(probs).item()
-        confianca = probs[0][classe_idx].item()
+        classe_idx = int(torch.argmax(probs).item())
+        confianca = float(probs[0][classe_idx].item())
 
     return {
         "classe": classes[classe_idx],
         "confianca": round(confianca, 2),
         "probabilidades": {
-            classes[i]: round(prob.item(), 2)
+            classes[i]: round(float(prob.item()), 2)
             for i, prob in enumerate(probs[0])
         }
     }

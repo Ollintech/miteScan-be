@@ -13,3 +13,4 @@ class Hive(Base):
     size = Column(Integer, nullable = False)
     humidity = Column(Float, nullable = True)
     temperature = Column(Float, nullable = True)
+    image_path = Column(String(255), nullable = True)

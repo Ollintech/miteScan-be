@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 import shutil
-from app.ai.predict import predict_image
+from ai.predict import predict_image
 
 router = APIRouter()
 

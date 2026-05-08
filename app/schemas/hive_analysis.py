@@ -5,6 +5,7 @@ class HiveAnalysisCreate(BaseModel):
     hive_id: int
     image_path: str
     varroa_detected: bool = False
+    bee_status: str | None = None
     detection_confidence: float
 
 class HiveAnalysisResponse(BaseModel):
@@ -13,6 +14,7 @@ class HiveAnalysisResponse(BaseModel):
     account: str
     image_path: str
     varroa_detected: bool = False
+    bee_status: str | None = None
     detection_confidence: float
     created_at: datetime
 

@@ -34,14 +34,13 @@ def on_message(client, userdata, msg):
             logger.warning(f"  -> Tópico '{msg.topic}' fora do formato esperado 'colmeia/+'. Ignorando.")
             return
 
-        account_name = data.get("conta_usuario")
-        hive_name = data.get("nome_colmeia")
-        
+        logger.info(f"  -> Payload original: {data}")
+
         api_payload = {
-            "account_name": account_name,
-            "hive_name": hive_name,
-            "temperature": data.get("t"),
-            "humidity": data.get("h")
+            "account_name": data.get("conta_usuario") or data.get("account_name"),
+            "hive_name": data.get("nome_colmeia") or data.get("hive_name"),
+            "temperature": data.get("t") if data.get("t") is not None else data.get("temperature"),
+            "humidity": data.get("h") if data.get("h") is not None else data.get("humidity")
         }
             
         logger.info(f"  -> Payload traduzido: {api_payload}")

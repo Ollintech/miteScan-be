@@ -22,6 +22,8 @@ Base.metadata.create_all(bind=engine)
 os.makedirs("uploads/hives", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+app.add_middleware(ActiveUserMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "https://mitescan.vercel.app"],
@@ -29,8 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-app.add_middleware(ActiveUserMiddleware)
 
 app.include_router(user_associated.router)
 app.include_router(user_root.router)

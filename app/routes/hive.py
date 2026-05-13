@@ -8,7 +8,7 @@ from models.analysis_backup import AnalysisBackup
 from models.user_root import UserRoot
 from models.user_associated import UserAssociated
 from schemas.hive import HiveResponse
-from typing import List, Optional
+from typing import List, Optional, Union
 from core.auth import (
     get_current_user_root,
     get_current_user_root_optional,
@@ -24,11 +24,11 @@ def sanitize_filename(name: str) -> str:
     """Remove caracteres inválidos para nomes de arquivos, especialmente no Windows."""
     return re.sub(r'[\\/*?:"<>|]', "", name).replace(" ", "_")
 
-def check_root_permission(account: str, current_user_root: UserRoot):
-    if not current_user_root:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado como usuário root")
-    if current_user_root.account != account:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ação não permitida")
+def check_permission(account: str, current_user: Union[UserRoot, UserAssociated]):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+    if current_user.account != account:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ação não permitida para esta conta")
 
 @router.post('/create', response_model=HiveResponse, status_code=status.HTTP_201_CREATED)
 async def create_hive(
@@ -42,9 +42,11 @@ async def create_hive(
     temperature: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db), 
-    current_user_root: UserRoot = Depends(get_current_user_root)
+    current_user_root: Optional[UserRoot] = Depends(get_current_user_root_optional),
+    current_user_associated: Optional[UserAssociated] = Depends(get_current_user_associated_optional)
 ):
-    check_root_permission(account, current_user_root) 
+    current_user = current_user_root or current_user_associated
+    check_permission(account, current_user) 
     
     if db.query(Hive).filter(Hive.name == name, Hive.account == account).first():
         raise HTTPException(status_code=400, detail='Uma colmeia com esse nome já foi cadastrada.')
@@ -109,10 +111,12 @@ async def update_hive(
     humidity: Optional[str] = Form(None),
     temperature: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db), 
-    current_user_root: UserRoot = Depends(get_current_user_root)
+    db: Session = Depends(get_db),
+    current_user_root: Optional[UserRoot] = Depends(get_current_user_root_optional),
+    current_user_associated: Optional[UserAssociated] = Depends(get_current_user_associated_optional)
 ):
-    check_root_permission(account, current_user_root) 
+    current_user = current_user_root or current_user_associated
+    check_permission(account, current_user) 
 
     hive = db.query(Hive).filter(Hive.id == hive_id, Hive.account == account).first()
     if not hive:
@@ -155,10 +159,12 @@ def delete_hive(
     account: str = Path(...),
     hive_id: int = Path(...), 
     db: Session = Depends(get_db), 
-    current_user_root: UserRoot = Depends(get_current_user_root), 
+    current_user_root: Optional[UserRoot] = Depends(get_current_user_root_optional),
+    current_user_associated: Optional[UserAssociated] = Depends(get_current_user_associated_optional),
     confirm: Optional[bool] = Query(False) 
 ):
-    check_root_permission(account, current_user_root) 
+    current_user = current_user_root or current_user_associated
+    check_permission(account, current_user) 
 
     hive = db.query(Hive).filter(Hive.id == hive_id, Hive.account == account).first()
     if not hive:

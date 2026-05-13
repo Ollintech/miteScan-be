@@ -10,7 +10,7 @@ router = APIRouter(prefix='/sensors', tags=['Sensors'])
 
 @router.post("/", response_model=SensorResponse)
 def receive_data(sensor_data: SensorDataCreate, db: Session = Depends(get_db)):
-    hive = db.query(Hive).filter(
+    hive: Hive = db.query(Hive).filter(
         Hive.account == sensor_data.account_name,
         Hive.name == sensor_data.hive_name
     ).first()

@@ -116,3 +116,104 @@ miteScan-be/
 ├── .env              # Arquivo de variáveis de ambiente (local)
 └── README.md         # Este arquivo
 ```
+
+---
+
+## 🧠 Rede Neural - IA para análise de imagens
+Dentro do backend, temos um módulo de Inteligência Artificial desenvolvido para auxiliar apicultores na identificação de possíveis ameaças às colmeias, como a presença do ácaro varroa e deformações nas asas das abelhas.
+
+Este projeto implementa uma Rede Neural Convolucional (CNN) desenvolvida manualmente utilizando PyTorch, sem o uso de modelos prontos como YOLO, com o objetivo de compreender e controlar todo o processo de aprendizado da IA.
+
+### 🧠 Objetivo
+
+Identificar, a partir de imagens, se uma abelha está:
+
+- 🟢 Normal  
+- 🔴 Com presença de varroa  
+- 🟡 Com asas deformadas  
+
+Este módulo complementa o sistema principal do MiteScan, que utiliza sensores IoT (temperatura e umidade) para detectar condições de risco na colmeia.
+
+## 📊 Outputs e Métricas
+
+Durante o treinamento, o sistema gera automaticamente arquivos de saída na pasta outputs/:
+
+📁 Arquivos gerados
+- best_model.pth → modelo treinado com melhor desempenho na validação
+- training_graph.png → gráfico de acurácia (treino vs validação)
+- confusion_matrix.png → matriz de confusão das previsões
+
+## 📈 Gráfico de Treinamento
+
+Gerado com a biblioteca Matplotlib, mostra a evolução da acurácia ao longo das épocas:
+
+- Linha azul → acurácia de treino
+- Linha laranja → acurácia de validação
+
+Permite identificar:
+
+- aprendizado do modelo
+- overfitting
+- estabilidade do treinamento
+
+## 🔍 Matriz de Confusão
+
+Gerada com Seaborn + Scikit-learn, permite visualizar:
+
+- acertos por classe
+- erros de classificação
+- confusão entre categorias (ex: varroa vs normal)
+
+Os valores são normalizados (0 a 1), representando porcentagens.
+
+## ⚙️ Como Funciona
+
+O fluxo da IA é dividido em três partes principais:
+
+### 📥 Treinamento (`train.py`)
+
+- Carrega as imagens do dataset
+- Redimensiona e transforma em **tensores (matrizes numéricas)**
+- Executa o treinamento da rede neural
+- Calcula o erro da previsão
+- Ajusta os pesos com **backpropagation**
+- Salva o modelo treinado em `outputs/best_model.pth`
+
+### 🧠 Arquitetura da Rede (`model/cnn.py`)
+
+Define a estrutura da CNN:
+
+- Camadas convolucionais (extração de características)
+- Funções de ativação (ReLU)
+- Camadas de pooling
+- Camadas totalmente conectadas
+
+A rede aprende padrões como:
+
+- presença do ácaro varroa
+- deformações nas asas
+- características de abelhas saudáveis
+
+### 🔍 Inferência (`predict.py`)
+
+- Recebe uma imagem nova
+- Aplica o mesmo pré-processamento do treino
+- Carrega o modelo treinado (`best_model.pth`)
+- Retorna a classificação com base nos padrões aprendidos
+
+
+## 🔄 Fluxo do Sistema
+
+
+Imagem → Tensor → CNN → Probabilidades → Classe
+
+
+## 🧪 Tecnologias Utilizadas
+
+- Python 3.x  
+- PyTorch  
+- Torchvision  
+- Pillow  
+- Matplotlib  
+- Seaborn  
+- Scikit-learn  

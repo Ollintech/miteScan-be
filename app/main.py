@@ -7,7 +7,6 @@ from mqtt_handler import run_mqtt_in_background
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-# from seed import seed_data
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -44,7 +43,6 @@ app.include_router(auth_routes.router)
 app.include_router(ai_routes.router, prefix="/ai", tags=["AI"])
 
 if __name__ == "__main__":
-    # seed_data()
     import multiprocessing
     import sys
     if sys.platform.startswith("win"):

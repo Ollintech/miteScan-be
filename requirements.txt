@@ -12,5 +12,5 @@ PyJWT==2.10.1
 paho-mqtt==2.1.0
 Pillow
 numpy<2.0.0
-torch==2.2.2
-torchvision==0.17.2
+torch
+torchvision

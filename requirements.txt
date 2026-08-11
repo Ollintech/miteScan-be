@@ -1,3 +1,8 @@
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
+torch
+torchvision
 fastapi==0.115.11
 uvicorn==0.34.0
 pydantic==2.10.6
@@ -12,5 +17,3 @@ PyJWT==2.10.1
 paho-mqtt==2.1.0
 Pillow
 numpy<2.0.0
-torch
-torchvision

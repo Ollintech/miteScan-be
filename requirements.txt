@@ -52,6 +52,6 @@ typing_extensions==4.12.2
 urllib3==2.4.0
 uvicorn==0.34.0
 wsproto==1.2.0
-torch==2.2.2
-torchvision==0.17.2
-Pillow==10.3.0
+torch
+torchvision
+Pillow

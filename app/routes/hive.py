@@ -14,14 +14,19 @@ from core.auth import (
     get_current_user_root_optional,
     get_current_user_associated_optional
 )
-import shutil
+from supabase import create_client, Client
 import os
 import re
 
 router = APIRouter(prefix='/{account}/hives', tags=['Hives'])
 
+# Inicializa o cliente do Supabase usando as variáveis do .env
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
+
 def sanitize_filename(name: str) -> str:
-    """Remove caracteres inválidos para nomes de arquivos, especialmente no Windows."""
+    """Remove caracteres inválidos para nomes de arquivos."""
     return re.sub(r'[\\/*?:"<>|]', "", name).replace(" ", "_")
 
 def check_permission(account: str, current_user: Union[UserRoot, UserAssociated]):
@@ -29,6 +34,32 @@ def check_permission(account: str, current_user: Union[UserRoot, UserAssociated]
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
     if current_user.account != account:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ação não permitida para esta conta")
+
+async def upload_image_to_supabase(image: UploadFile, account: str, hive_name: str) -> Optional[str]:
+    """Faz o upload da imagem para o bucket do Supabase e retorna a URL pública."""
+    if not image or not image.filename or not supabase:
+        return None
+    
+    try:
+        safe_hive_name = sanitize_filename(hive_name)
+        safe_file_name = sanitize_filename(image.filename)
+        file_path = f"hives/{account}_{safe_hive_name}_{safe_file_name}"
+        
+        contents = await image.read()
+        
+        bucket_name = "images-mitescan" 
+        
+        supabase.storage.from_(bucket_name).upload(
+            path=file_path,
+            file=contents,
+            file_options={"content-type": image.content_type, "upsert": "true"}
+        )
+        
+        public_url_res = supabase.storage.from_(bucket_name).get_public_url(file_path)
+        return public_url_res
+    except Exception as e:
+        print(f"Erro ao enviar imagem para o Supabase: {e}")
+        return None
 
 @router.post('/create', response_model=HiveResponse, status_code=status.HTTP_201_CREATED)
 async def create_hive(
@@ -61,18 +92,7 @@ async def create_hive(
     except ValueError:
         raise HTTPException(status_code=422, detail="Dados numéricos inválidos")
 
-    image_path = None
-    if image and image.filename:
-        try:
-            os.makedirs("uploads/hives", exist_ok=True)
-            safe_hive_name = sanitize_filename(name)
-            safe_file_name = sanitize_filename(image.filename)
-            file_path = f"uploads/hives/{account}_{safe_hive_name}_{safe_file_name}"
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-            image_path = file_path
-        except Exception as e:
-            print(f"Erro ao salvar imagem: {e}")
+    image_path = await upload_image_to_supabase(image, account, name)
 
     new_hive = Hive(
         name=name, account=account, bee_type_id=b_id,
@@ -122,6 +142,7 @@ async def update_hive(
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
     
+    target_name = name if name else hive.name
     if name:
         duplicate = db.query(Hive).filter(Hive.name == name, Hive.account == account, Hive.id != hive_id).first()
         if duplicate:
@@ -139,16 +160,9 @@ async def update_hive(
         raise HTTPException(status_code=422, detail="Dados numéricos inválidos")
 
     if image and image.filename:
-        try:
-            os.makedirs("uploads/hives", exist_ok=True)
-            safe_hive_name = sanitize_filename(hive.name)
-            safe_file_name = sanitize_filename(image.filename)
-            file_path = f"uploads/hives/{account}_{safe_hive_name}_{safe_file_name}"
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-            hive.image_path = file_path
-        except Exception as e:
-            print(f"Erro ao atualizar imagem: {e}")
+        new_image_path = await upload_image_to_supabase(image, account, target_name)
+        if new_image_path:
+            hive.image_path = new_image_path
 
     db.commit()
     db.refresh(hive)
@@ -183,24 +197,12 @@ def delete_hive(
         )
     
     try:
-        # 1. Apagar Backups das análises (dependência de HiveAnalysis)
         for analysis in analyses:
             db.query(AnalysisBackup).filter(AnalysisBackup.analysis_id == analysis.id).delete()
         
-        # 2. Apagar Análises
         db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).delete()
-        
-        # 3. Apagar Leituras de Sensores
         db.query(Sensor).filter(Sensor.hive_id == hive_id).delete()
         
-        # 4. Apagar arquivo de imagem se existir
-        if hive.image_path and os.path.exists(hive.image_path):
-            try:
-                os.remove(hive.image_path)
-            except:
-                pass
-
-        # 5. Apagar Colmeia
         db.delete(hive)
         db.commit()
         return None

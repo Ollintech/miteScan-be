@@ -8,7 +8,6 @@ import os
 from ai.predict import predict_image
 from datetime import datetime
 from supabase import create_client, Client
-import traceback
 
 router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
 
@@ -17,7 +16,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-BUCKET_NAME = "images-mitescan"  # Nome exato do bucket no Supabase
+BUCKET_NAME = "images"  # Nome exato do bucket que você criou no Supabase
 
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db)):
@@ -63,27 +62,37 @@ async def create_protected_analysis(
     temp_local_path = f"temp_{file.filename}"
 
     try:
-        # 3. Upload seguro para o Supabase Storage
+        print(f"\n--- 🔍 [TEST-IMAGE] NOVA ANÁLISE INICIADA ---")
+        print(f"📸 Imagem recebida: {file.filename}")
+        print(f"🐝 Colmeia ID: {hive_id}")
+        
+        # 3. Upload direto para o Supabase Storage (Bucket 'images')
+        print(f"☁️ Enviando imagem para o Supabase Storage...")
         supabase.storage.from_(BUCKET_NAME).upload(
             path=file_path_storage,
             file=file_bytes,
-            file_options={"content-type": file.content_type}
+            file_options={"content-type": file.content_type, "upsert": "true"}
         )
         
         # 4. Obter a URL pública oficial da imagem na nuvem
         public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_path_storage)
+        print(f"🔗 URL Pública gerada: {public_url}")
 
         # Como a IA precisa ler um arquivo físico temporariamente, criamos e apagamos logo em seguida
         with open(temp_local_path, "wb") as temp_file:
             temp_file.write(file_bytes)
 
+        print(f"🤖 Enviando para o modelo de IA...")
         ai_result = predict_image(temp_local_path)
         
         status_ai = ai_result.get("classe", "normal")
         confianca = ai_result.get("confianca", 0.0)
         
+        print(f"✅ Processamento concluído!")
+        print(f"⚖️ VEREDITO FINAL: {status_ai.upper()} ({confianca*100:.1f}% de confiança)")
+        print(f"--------------------------------\n")
+        
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Erro no processamento ou upload: {str(e)}")
     
     finally:
@@ -95,7 +104,7 @@ async def create_protected_analysis(
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_id,
         account = hive.account,
-        image_path = public_url,  # URL oficial da nuvem salva no banco
+        image_path = public_url,  # <--- Salvando o link oficial da nuvem no banco
         varroa_detected = (status_ai == "varroa"),
         bee_status = status_ai,
         detection_confidence = confianca

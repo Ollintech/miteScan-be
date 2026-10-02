@@ -4,17 +4,23 @@ from db.database import get_db
 from models.hive_analysis import HiveAnalysis
 from models.hive import Hive
 from schemas.hive_analysis import HiveAnalysisCreate, HiveAnalysisResponse
-from core.auth import require_access
-import shutil
 import os
 from ai.predict import predict_image
 from datetime import datetime
+from supabase import create_client, Client
 
 router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
 
+# Configuração do cliente Supabase para o Storage
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+BUCKET_NAME = "images"  # Nome exato do bucket que você criou no Supabase
+
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db)):
-    """Rota legado (JSON) - Mantida para compatibilidade, mas menos segura."""
+    """Rota legado (JSON) - Mantida para compatibilidade."""
     hive = db.query(Hive).filter(Hive.id == hive_analysis.hive_id).first()
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
@@ -39,29 +45,45 @@ async def create_protected_analysis(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    """Rota SEGURA: Recebe o arquivo, processa na IA e salva o resultado final."""
+    """Rota SEGURA: Faz o upload para o Supabase Storage, processa na IA e salva o link público."""
     
     # 1. Verificar colmeia
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
 
-    # 2. Salvar imagem da análise
-    os.makedirs("uploads/analyses", exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_path = f"uploads/analyses/{hive.account}_hive{hive_id}_{timestamp}_{file.filename}"
+    # 2. Ler os bytes do arquivo enviado
+    file_bytes = await file.read()
     
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_name = f"{hive.account}_hive{hive_id}_{timestamp}_{file.filename}"
+    file_path_storage = f"analyses/{file_name}"
+    
+    temp_local_path = f"temp_{file.filename}"
 
-    # 3. Chamar IA para predição REAL
     try:
-        print(f"\n--- 🔍 NOVA ANÁLISE INICIADA ---")
+        print(f"\n--- 🔍 [TEST-IMAGE] NOVA ANÁLISE INICIADA ---")
         print(f"📸 Imagem recebida: {file.filename}")
         print(f"🐝 Colmeia ID: {hive_id}")
-        print(f"🤖 Enviando para o modelo de IA...")
         
-        ai_result = predict_image(file_path)
+        # 3. Upload direto para o Supabase Storage (Bucket 'images')
+        print(f"☁️ Enviando imagem para o Supabase Storage...")
+        supabase.storage.from_(BUCKET_NAME).upload(
+            path=file_path_storage,
+            file=file_bytes,
+            file_options={"content-type": file.content_type, "upsert": "true"}
+        )
+        
+        # 4. Obter a URL pública oficial da imagem na nuvem
+        public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_path_storage)
+        print(f"🔗 URL Pública gerada: {public_url}")
+
+        # Como a IA precisa ler um arquivo físico temporariamente, criamos e apagamos logo em seguida
+        with open(temp_local_path, "wb") as temp_file:
+            temp_file.write(file_bytes)
+
+        print(f"🤖 Enviando para o modelo de IA...")
+        ai_result = predict_image(temp_local_path)
         
         status_ai = ai_result.get("classe", "normal")
         confianca = ai_result.get("confianca", 0.0)
@@ -69,16 +91,20 @@ async def create_protected_analysis(
         print(f"✅ Processamento concluído!")
         print(f"⚖️ VEREDITO FINAL: {status_ai.upper()} ({confianca*100:.1f}% de confiança)")
         print(f"--------------------------------\n")
+        
     except Exception as e:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(status_code=500, detail=f"Erro no processamento da IA: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro no processamento ou upload: {str(e)}")
+    
+    finally:
+        # Limpa o arquivo temporário local se ele existir
+        if os.path.exists(temp_local_path):
+            os.remove(temp_local_path)
 
-    # 4. Salvar no banco
+    # 5. Salvar no banco de dados usando a URL pública do Supabase Storage
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_id,
         account = hive.account,
-        image_path = file_path,
+        image_path = public_url,  # <--- Salvando o link oficial da nuvem no banco
         varroa_detected = (status_ai == "varroa"),
         bee_status = status_ai,
         detection_confidence = confianca

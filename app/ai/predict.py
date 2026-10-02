@@ -1,3 +1,4 @@
+import os
 import torch
 from PIL import Image
 from torchvision import transforms
@@ -16,7 +17,11 @@ model = MiteScanCNN()
 dummy_input = torch.randn(1, 3, 224, 224)
 model(dummy_input)
 
-model.load_state_dict(torch.load("app/ai/model/best_model.pth"))
+# 🔄 CORREÇÃO AQUI: Caminho dinâmico e seguro para o model.pth
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "model", "best_model.pth")
+
+model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
 
 

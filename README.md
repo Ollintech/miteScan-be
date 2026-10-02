@@ -34,8 +34,8 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento.
 2.  **Crie e ative um ambiente virtual:**
     ```bash
     # Windows
-    python -m venv venv
-    .\venv\Scripts\activate
+    py -3.10 -m venv venv
+    .\venv\Scripts\Activate
 
     # macOS / Linux
     python3 -m venv venv
@@ -82,7 +82,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento.
 1.  **Inicie o servidor FastAPI:**
     A partir da raiz do projeto, execute:
     ```bash
-    python app/main.py
+    python app/main.py ou uvicorn app.main:app --reload
     ```
 
 2.  O servidor estará rodando em `http://localhost:8000`.

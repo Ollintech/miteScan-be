@@ -66,7 +66,7 @@ async def create_protected_analysis(
         print(f"📸 Imagem recebida: {file.filename}")
         print(f"🐝 Colmeia ID: {hive_id}")
         
-        # 3. Upload direto para o Supabase Storage (Bucket 'images')
+        # 3. Upload direto para o Supabase Storage
         print(f"☁️ Enviando imagem para o Supabase Storage...")
         supabase.storage.from_(BUCKET_NAME).upload(
             path=file_path_storage,
@@ -104,7 +104,7 @@ async def create_protected_analysis(
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_id,
         account = hive.account,
-        image_path = public_url,  # <--- Salvando o link oficial da nuvem no banco
+        image_path = public_url,  # Salvando o link oficial da nuvem no banco
         varroa_detected = (status_ai == "varroa"),
         bee_status = status_ai,
         detection_confidence = confianca
@@ -154,7 +154,17 @@ def delete_hive_analysis(hive_analysis_id: int, db: Session = Depends(get_db)):
     if not hive_analysis:
         raise HTTPException(status_code = 404, detail = 'Análise de colmeia não encontrada.')
     
+    # Remove o arquivo de imagem correspondente do Supabase Storage
+    try:
+        if hive_analysis.image_path and BUCKET_NAME in hive_analysis.image_path:
+            path_parts = hive_analysis.image_path.split(f"/{BUCKET_NAME}/")
+            if len(path_parts) > 1:
+                file_path_in_bucket = path_parts[1]
+                supabase.storage.from_(BUCKET_NAME).remove([file_path_in_bucket])
+    except Exception as e:
+        print(f"Erro ao remover imagem do Supabase: {e}")
+
     db.delete(hive_analysis)
     db.commit()
 
-    return {'message': f'Análise de colmeia deletada com sucesso!'}
+    return None

@@ -9,8 +9,15 @@ import shutil
 import os
 from ai.predict import predict_image
 from datetime import datetime
+from supabase import create_client, Client
 
 router = APIRouter(prefix = '/hive_analyses', tags = ['Hive Analyses'])
+
+# Configuração do Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+BUCKET_NAME = "images-mitescan"
 
 @router.post('/create', response_model = HiveAnalysisResponse, status_code = status.HTTP_201_CREATED)
 def create_hive_analysis(hive_analysis: HiveAnalysisCreate, db: Session = Depends(get_db)):
@@ -39,29 +46,42 @@ async def create_protected_analysis(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    """Rota SEGURA: Recebe o arquivo, processa na IA e salva o resultado final."""
+    """Rota SEGURA: Recebe o arquivo, envia para o Supabase, processa na IA e salva a URL pública."""
     
     # 1. Verificar colmeia
     hive = db.query(Hive).filter(Hive.id == hive_id).first()
     if not hive:
         raise HTTPException(status_code=404, detail='Colmeia não encontrada.')
 
-    # 2. Salvar imagem da análise
-    os.makedirs("uploads/analyses", exist_ok=True)
+    # 2. Ler os bytes da imagem para enviar ao Supabase e processar na IA
+    file_bytes = await file.read()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_path = f"uploads/analyses/{hive.account}_hive{hive_id}_{timestamp}_{file.filename}"
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    file_name = f"{hive.account}_hive{hive_id}_{timestamp}_{file.filename}"
+    supabase_path = f"analyses/{file_name}"
 
-    # 3. Chamar IA para predição REAL
+    # Salva temporariamente apenas para a IA processar localmente
+    os.makedirs("uploads/analyses", exist_ok=True)
+    temp_local_path = f"uploads/analyses/{file_name}"
+    with open(temp_local_path, "wb") as buffer:
+        buffer.write(file_bytes)
+
     try:
+        # 3. Fazer o upload diretamente para o Bucket do Supabase (pasta analyses/)
+        supabase.storage.from_(BUCKET_NAME).upload(
+            supabase_path,
+            file_bytes,
+            file_options={"content-type": file.content_type, "upsert": "true"}
+        )
+
+        # 4. Obter a URL pública gerada pelo Supabase
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{supabase_path}"
+
+        # 5. Chamar IA para predição REAL
         print(f"\n--- 🔍 NOVA ANÁLISE INICIADA ---")
-        print(f"📸 Imagem recebida: {file.filename}")
-        print(f"🐝 Colmeia ID: {hive_id}")
+        print(f"📸 Imagem: {file.filename}")
         print(f"🤖 Enviando para o modelo de IA...")
         
-        ai_result = predict_image(file_path)
+        ai_result = predict_image(temp_local_path)
         
         status_ai = ai_result.get("classe", "normal")
         confianca = ai_result.get("confianca", 0.0)
@@ -69,16 +89,19 @@ async def create_protected_analysis(
         print(f"✅ Processamento concluído!")
         print(f"⚖️ VEREDITO FINAL: {status_ai.upper()} ({confianca*100:.1f}% de confiança)")
         print(f"--------------------------------\n")
-    except Exception as e:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(status_code=500, detail=f"Erro no processamento da IA: {str(e)}")
 
-    # 4. Salvar no banco
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro no processamento ou upload: {str(e)}")
+    finally:
+        # Limpa o arquivo temporário local
+        if os.path.exists(temp_local_path):
+            os.remove(temp_local_path)
+
+    # 6. Salvar no banco a URL pública do Supabase em vez do caminho local
     new_hive_analysis = HiveAnalysis(
         hive_id = hive_id,
         account = hive.account,
-        image_path = file_path,
+        image_path = public_url,
         varroa_detected = (status_ai == "varroa"),
         bee_status = status_ai,
         detection_confidence = confianca

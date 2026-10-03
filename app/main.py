@@ -1,5 +1,17 @@
+import sys
+import os
+
+# Adiciona o diretório atual (app) e o diretório pai (raiz) ao caminho do Python
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, Depends
-import uvicorn, os
+import uvicorn
+from dotenv import load_dotenv
+
+# Carrega o .env da raiz do projeto de forma segura
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor, auth_routes, ai_routes
 from db.database import Base, engine
 from core.middleware import ActiveUserMiddleware
@@ -44,9 +56,7 @@ app.include_router(ai_routes.router, prefix="/ai", tags=["AI"])
 
 if __name__ == "__main__":
     import multiprocessing
-    import sys
     if sys.platform.startswith("win"):
-        import multiprocessing
         try:
             multiprocessing.set_start_method("spawn", force=True)
         except RuntimeError:

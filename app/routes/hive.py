@@ -17,8 +17,16 @@ from core.auth import (
 import shutil
 import os
 import re
+from datetime import datetime
+from supabase import create_client, Client
 
 router = APIRouter(prefix='/{account}/hives', tags=['Hives'])
+
+# Configuração do Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+BUCKET_NAME = "images-mitescan"
 
 def sanitize_filename(name: str) -> str:
     """Remove caracteres inválidos para nomes de arquivos, especialmente no Windows."""
@@ -64,15 +72,24 @@ async def create_hive(
     image_path = None
     if image and image.filename:
         try:
-            os.makedirs("uploads/hives", exist_ok=True)
+            file_bytes = await image.read()
             safe_hive_name = sanitize_filename(name)
             safe_file_name = sanitize_filename(image.filename)
-            file_path = f"uploads/hives/{account}_{safe_hive_name}_{safe_file_name}"
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-            image_path = file_path
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            supabase_path = f"hives/{account}_{safe_hive_name}_{timestamp}_{safe_file_name}"
+            
+            # Upload direto para o Supabase
+            supabase.storage.from_(BUCKET_NAME).upload(
+                supabase_path,
+                file_bytes,
+                file_options={"content-type": image.content_type, "upsert": "true"}
+            )
+            
+            # URL pública gerada do Supabase
+            image_path = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{supabase_path}"
         except Exception as e:
-            print(f"Erro ao salvar imagem: {e}")
+            print(f"Erro ao enviar imagem para o Supabase: {e}")
 
     new_hive = Hive(
         name=name, account=account, bee_type_id=b_id,
@@ -140,15 +157,22 @@ async def update_hive(
 
     if image and image.filename:
         try:
-            os.makedirs("uploads/hives", exist_ok=True)
+            file_bytes = await image.read()
             safe_hive_name = sanitize_filename(hive.name)
             safe_file_name = sanitize_filename(image.filename)
-            file_path = f"uploads/hives/{account}_{safe_hive_name}_{safe_file_name}"
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
-            hive.image_path = file_path
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            supabase_path = f"hives/{account}_{safe_hive_name}_{timestamp}_{safe_file_name}"
+            
+            supabase.storage.from_(BUCKET_NAME).upload(
+                supabase_path,
+                file_bytes,
+                file_options={"content-type": image.content_type, "upsert": "true"}
+            )
+            
+            hive.image_path = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{supabase_path}"
         except Exception as e:
-            print(f"Erro ao atualizar imagem: {e}")
+            print(f"Erro ao atualizar imagem no Supabase: {e}")
 
     db.commit()
     db.refresh(hive)
@@ -183,24 +207,12 @@ def delete_hive(
         )
     
     try:
-        # 1. Apagar Backups das análises (dependência de HiveAnalysis)
         for analysis in analyses:
             db.query(AnalysisBackup).filter(AnalysisBackup.analysis_id == analysis.id).delete()
         
-        # 2. Apagar Análises
         db.query(HiveAnalysis).filter(HiveAnalysis.hive_id == hive_id).delete()
-        
-        # 3. Apagar Leituras de Sensores
         db.query(Sensor).filter(Sensor.hive_id == hive_id).delete()
         
-        # 4. Apagar arquivo de imagem se existir
-        if hive.image_path and os.path.exists(hive.image_path):
-            try:
-                os.remove(hive.image_path)
-            except:
-                pass
-
-        # 5. Apagar Colmeia
         db.delete(hive)
         db.commit()
         return None

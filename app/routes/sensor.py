@@ -6,9 +6,12 @@ from models.hive import Hive
 from models.sensor_readings import Sensor
 from schemas.sensor import SensorDataCreate, SensorResponse
 
-router = APIRouter(prefix='/sensors', tags=['Sensors'])
+router = APIRouter(tags=['Sensors'])
 
-@router.post("/", response_model=SensorResponse)
+@router.post("/sensors", response_model=SensorResponse)
+@router.post("/sensors/", response_model=SensorResponse, include_in_schema=False)
+@router.post("/sensor", response_model=SensorResponse, include_in_schema=False)
+@router.post("/sensor/", response_model=SensorResponse, include_in_schema=False)
 def receive_data(sensor_data: SensorDataCreate, db: Session = Depends(get_db)):
     hive: Hive = db.query(Hive).filter(
         Hive.account == sensor_data.account_name,
@@ -40,7 +43,8 @@ def receive_data(sensor_data: SensorDataCreate, db: Session = Depends(get_db)):
 
     return new_sensor_reading
 
-@router.get("/{hive_id}", response_model=List[SensorResponse])
+@router.get("/sensors/{hive_id}", response_model=List[SensorResponse])
+@router.get("/sensor/{hive_id}", response_model=List[SensorResponse], include_in_schema=False)
 def get_sensor_readings_for_hive(
     hive_id: int, 
     db: Session = Depends(get_db)

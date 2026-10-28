@@ -16,5 +16,12 @@ class Settings(BaseSettings):
     mqtt_port: int
     mqtt_topic: str
     api_sensor_url: str
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_claims_email: str = "mailto:admin@mitescan.com"
+    temp_min_alert: float = 20.0
+    temp_max_alert: float = 29.0
+    humidity_min_alert: float = 45.0
+    humidity_max_alert: float = 80.0
 
 settings = Settings()

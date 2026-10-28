@@ -5,6 +5,7 @@ from db.database import get_db
 from models.hive import Hive
 from models.sensor_readings import Sensor
 from schemas.sensor import SensorDataCreate, SensorResponse
+from services.notification_service import check_sensor_and_alert
 
 router = APIRouter(tags=['Sensors'])
 
@@ -36,6 +37,17 @@ def receive_data(sensor_data: SensorDataCreate, db: Session = Depends(get_db)):
         hive.temperature = sensor_data.temperature
 
         db.commit()
+
+        # Verifica limiares de alerta e dispara notificação no computador se necessário
+        try:
+            check_sensor_and_alert(
+                hive=hive,
+                temperature=sensor_data.temperature,
+                humidity=sensor_data.humidity,
+                db=db
+            )
+        except Exception as alert_err:
+            print(f"⚠️ Erro ao verificar alertas de notificação: {alert_err}")
 
     except Exception as e:
         db.rollback()

@@ -8,6 +8,7 @@ Este é o backend do projeto MiteScan, desenvolvido com FastAPI. Ele é respons�
 - **Autenticação JWT**: Sistema de login seguro com tokens.
 - **Integração MQTT**: Um serviço em background que escuta um broker MQTT, processa os dados recebidos dos sensores e os envia para a API.
 - **ORM com SQLAlchemy**: Mapeamento objeto-relacional para interação com o banco de dados.
+- **Notificações Web Push no Computador**: Envio de alertas de temperatura e umidade direto para o sistema operacional (Windows/Mac/Linux) via protocolo Web Push (VAPID) com Service Worker.
 - **Seed de Dados**: Popula o banco de dados com dados iniciais na primeira execução.
 - **Estrutura Organizada**: Código modularizado em rotas, schemas, modelos e serviços.
 
@@ -82,7 +83,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento.
 1.  **Inicie o servidor FastAPI:**
     A partir da raiz do projeto, execute:
     ```bash
-    python app/main.py
+        python -m uvicorn app.main:app --reload
     ```
 
 2.  O servidor estará rodando em `http://localhost:8000`.

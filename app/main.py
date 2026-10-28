@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Carrega o .env da raiz do projeto de forma segura
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor, auth_routes, ai_routes
+from routes import user_root, hive, bee_type, analysis_backup, hive_analysis, access, user_associated, sensor, auth_routes, ai_routes, notification
 from db.database import Base, engine
 from core.middleware import ActiveUserMiddleware
 from mqtt_handler import run_mqtt_in_background
@@ -53,6 +53,7 @@ app.include_router(hive_analysis.router)
 app.include_router(sensor.router)
 app.include_router(auth_routes.router)
 app.include_router(ai_routes.router, prefix="/ai", tags=["AI"])
+app.include_router(notification.router)
 
 if __name__ == "__main__":
     import multiprocessing

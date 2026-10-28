@@ -18,3 +18,4 @@ paho-mqtt==2.1.0
 Pillow
 numpy<2.0.0
 supabase>=2.0.0
+pywebpush>=2.0.0

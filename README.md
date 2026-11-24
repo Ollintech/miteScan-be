@@ -218,3 +218,37 @@ Imagem → Tensor → CNN → Probabilidades → Classe
 - Matplotlib  
 - Seaborn  
 - Scikit-learn  
+
+
+## Credenciais para Avaliação do Projeto Integrador
+
+.env
+```
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=password
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5440
+#porta 5432 ou 5440(fatec)
+POSTGRES_DB=mitescan
+DATABASE_URL=postgresql://postgres.angzdelcvwneuqwhmfbd:QuaggioTheGroup@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+#String antiga
+#postgresql://postgres.rpapdklqaoznqcfgawqr:QuaggioTheGroup@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
+SECRET_KEY=sua_chave_secreta
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+MQTT_BROKER=broker.hivemq.com
+MQTT_PORT=1883
+MQTT_TOPIC=colmeia/dados
+API_SENSOR_URL=http://localhost:8000/sensor
+
+SUPABASE_URL=https://angzdelcvwneuqwhmfbd.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuZ3pkZWxjdnduZXVxd2htZmJkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjgyMzI5MSwiZXhwIjoyMDkyMzk5MjkxfQ.tdzH1UJ7PkKqo7wC2l9Czs14ZKXxxy1L9Rl_W54Q5_s
+
+```
+
+Login e senha para Web App em nuvem (https://mitescan.vercel.app/):
+```
+gustavo
+gustavo@mitescan.com
+gustavo123
+```
